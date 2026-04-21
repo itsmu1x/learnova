@@ -1,1 +1,9 @@
-dummy
+node_modules
+.env
+.env.*
+!.env.example
+dist
+build
+.drizzle
+*.log
+.DS_Store
