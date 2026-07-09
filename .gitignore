@@ -1,9 +1,48 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Env
 .env
-.env.*
-!.env.example
-dist
-build
-.drizzle
+.env.local
+.env.*.local
+
+# Logs
 *.log
+npm-debug.log*
+npm-debug.log*
+
+# Editor / OS
 .DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+
+# Testing / coverage
+coverage/
+
+# Flutter / Dart
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/build/
+apps/mobile/.pub-cache/
+apps/mobile/.pub/
+apps/mobile/ios/Pods/
+apps/mobile/android/.gradle/
+apps/mobile/**/GeneratedPluginRegistrant.*
+
+# Uploads / temp
+tmp/
+uploads/
+
+# local temp
+.tmp-xdg/
+node_modules_old/

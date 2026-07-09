@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 248 250 252;
+  --foreground: 15 23 42;
+}
+
+.dark {
+  --background: 2 6 23;
+  --foreground: 226 232 240;
+}
+
+body {
+  background-color: rgb(var(--background));
+  color: rgb(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .gradient-hero {
+    background-image: radial-gradient(60% 60% at 50% 0%, rgba(99, 102, 241, 0.15), transparent 70%);
+  }
+}
