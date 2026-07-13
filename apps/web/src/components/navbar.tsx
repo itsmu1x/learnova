@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { GraduationCap, Moon, Search, Sun } from 'lucide-react';
+import { Moon, Search, Sun } from 'lucide-react';
 import { Button, Container } from '@learnova/ui';
+import { Logo } from '@/components/logo';
 import { useAuth } from '@/lib/auth-context';
 
 export function Navbar() {
@@ -17,9 +18,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/80">
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-            <GraduationCap size={20} />
-          </span>
+          <Logo variant="mark" height={36} priority />
           <span className="text-lg">Learnova</span>
         </Link>
 

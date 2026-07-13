@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Github } from 'lucide-react';
 import { Button, Card, CardBody, Container, Input } from '@learnova/ui';
+import { Logo } from '@/components/logo';
 import { API_URL } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 
@@ -33,6 +34,9 @@ export default function LoginPage() {
     <Container className="flex min-h-[70vh] items-center justify-center py-12">
       <Card className="w-full max-w-md">
         <CardBody className="p-8">
+          <div className="mb-6 flex justify-center">
+            <Logo variant="full" height={96} priority />
+          </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
           <p className="mt-1 text-sm text-slate-500">Log in to continue learning.</p>
 

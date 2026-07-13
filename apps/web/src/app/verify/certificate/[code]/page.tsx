@@ -1,5 +1,6 @@
 import { BadgeCheck, XCircle } from 'lucide-react';
 import { Card, CardBody, Container } from '@learnova/ui';
+import { Logo } from '@/components/logo';
 import { apiFetch } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,9 @@ export default async function VerifyCertificatePage({ params }: { params: { code
     <Container className="flex min-h-[70vh] items-center justify-center py-12">
       <Card className="w-full max-w-lg">
         <CardBody className="p-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <Logo variant="mark" height={48} />
+          </div>
           {result?.valid ? (
             <>
               <BadgeCheck size={56} className="mx-auto text-emerald-500" />

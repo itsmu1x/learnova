@@ -105,6 +105,29 @@ export const enrollmentsService = {
     return enrollment;
   },
 
+  /** Lightweight ownership check for course-detail CTAs. */
+  async getStatus(userId: string, courseId: string) {
+    const [enrollment] = await db()
+      .select({
+        id: schema.enrollments.id,
+        progressPercent: schema.enrollments.progressPercent,
+        completedAt: schema.enrollments.completedAt,
+      })
+      .from(schema.enrollments)
+      .where(and(eq(schema.enrollments.userId, userId), eq(schema.enrollments.courseId, courseId)))
+      .limit(1);
+
+    if (!enrollment) {
+      return { enrolled: false as const, progressPercent: 0, completed: false };
+    }
+
+    return {
+      enrolled: true as const,
+      progressPercent: enrollment.progressPercent,
+      completed: Boolean(enrollment.completedAt),
+    };
+  },
+
   async updateLessonProgress(
     userId: string,
     lessonId: string,

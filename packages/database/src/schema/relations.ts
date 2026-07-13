@@ -58,6 +58,10 @@ export const userRolesRelations = relations(userRoles, ({ one }) => ({
   role: one(roles, { fields: [userRoles.roleId], references: [roles.id] }),
 }));
 
+export const authTokensRelations = relations(authTokens, ({ one }) => ({
+  user: one(users, { fields: [authTokens.userId], references: [users.id] }),
+}));
+
 export const categoriesRelations = relations(categories, ({ many }) => ({
   courses: many(courses),
 }));

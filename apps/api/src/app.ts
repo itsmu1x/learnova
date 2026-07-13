@@ -33,10 +33,11 @@ export function createApp(): Application {
   });
   if (!isProduction()) app.use(morgan('dev'));
 
-  // Stripe webhook needs the raw body and must precede the JSON parser.
+  // Stripe webhook needs the untouched raw body for signature verification.
+  // Mount before express.json() and use */* so Content-Type charset variants still match.
   app.post(
     `${APP.API_PREFIX}/payments/webhook`,
-    express.raw({ type: 'application/json' }),
+    express.raw({ type: '*/*' }),
     asyncHandler(stripeWebhookHandler),
   );
 

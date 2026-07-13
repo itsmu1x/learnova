@@ -25,6 +25,7 @@ export interface CurriculumSection {
   lessons: {
     id: string;
     title: string;
+    description?: string | null;
     durationSeconds: number;
     isPreview: boolean;
   }[];

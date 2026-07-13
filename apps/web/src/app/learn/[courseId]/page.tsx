@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Circle, PlayCircle, Send } from 'lucide-react';
+import { CheckCircle2, Circle, Send } from 'lucide-react';
 import { Button, Container, Spinner } from '@learnova/ui';
 import { apiFetch } from '@/lib/api';
+import { MuxLessonPlayer } from '@/components/mux-lesson-player';
 import { Protected } from '@/components/protected';
 import type { CourseDetail } from '@/lib/types';
 
@@ -75,15 +76,7 @@ function LearnInner({ courseId }: { courseId: string }) {
   return (
     <div className="grid lg:grid-cols-[1fr_360px]">
       <div className="min-h-screen">
-        <div className="aspect-video w-full bg-slate-900">
-          <div className="flex h-full flex-col items-center justify-center text-center text-white">
-            <PlayCircle size={56} className="text-white/70" />
-            <p className="mt-3 max-w-md text-sm text-white/60">
-              Secure Mux player renders here. A signed playback token is fetched from{' '}
-              <code>/videos/{activeLesson?.id}/playback</code>.
-            </p>
-          </div>
-        </div>
+        <MuxLessonPlayer lessonId={activeLessonId} title={activeLesson?.title} />
 
         <Container className="py-8">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{activeLesson?.title}</h1>

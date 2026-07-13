@@ -68,8 +68,12 @@ export function passwordResetEmail(name: string, link: string): SendArgs['html']
 }
 
 function baseTemplate(title: string, body: string, cta: string, link: string): string {
+  const logoUrl = `${getEnv().WEB_URL}/brand/logo-full.png`;
   return `
   <div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;color:#0f172a">
+    <div style="text-align:center;margin-bottom:24px">
+      <img src="${logoUrl}" alt="Learnova" width="160" height="160" style="display:inline-block;width:160px;height:auto" />
+    </div>
     <h1 style="font-size:20px;margin:0 0 12px">${title}</h1>
     <p style="color:#475569;line-height:1.6">${body}</p>
     <a href="${link}" style="display:inline-block;margin:20px 0;padding:12px 22px;background:#4f46e5;color:#fff;border-radius:10px;text-decoration:none;font-weight:600">${cta}</a>

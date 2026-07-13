@@ -17,8 +17,22 @@ export async function stripeWebhookHandler(req: Request, res: Response): Promise
     res.status(400).send('Missing stripe-signature header');
     return;
   }
+
+  const rawBody = Buffer.isBuffer(req.body)
+    ? req.body
+    : typeof req.body === 'string'
+      ? Buffer.from(req.body, 'utf8')
+      : null;
+
+  if (!rawBody) {
+    res.status(400).send(
+      'Webhook body was parsed as JSON before verification. The route must use express.raw() and be registered before express.json().',
+    );
+    return;
+  }
+
   try {
-    const event = constructWebhookEvent(req.body as Buffer, signature);
+    const event = constructWebhookEvent(rawBody, signature);
     await paymentsService.handleWebhookEvent(event);
     res.json({ received: true });
   } catch (error) {

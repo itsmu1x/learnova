@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button, Card, CardBody, Container, Input } from '@learnova/ui';
+import { Logo } from '@/components/logo';
 import { useAuth } from '@/lib/auth-context';
 
 export default function RegisterPage() {
@@ -32,6 +33,9 @@ export default function RegisterPage() {
     <Container className="flex min-h-[70vh] items-center justify-center py-12">
       <Card className="w-full max-w-md">
         <CardBody className="p-8">
+          <div className="mb-6 flex justify-center">
+            <Logo variant="full" height={96} priority />
+          </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Create your account</h1>
           <p className="mt-1 text-sm text-slate-500">Start learning in minutes — it&apos;s free.</p>
 

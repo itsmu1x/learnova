@@ -19,7 +19,7 @@ export function validate(schemas: Schemas) {
         const parsed = schemas.query.parse(req.query);
         Object.defineProperty(req, 'query', { value: parsed, writable: true, configurable: true });
       }
-      if (schemas.body) req.body = schemas.body.parse(req.body);
+      if (schemas.body) req.body = schemas.body.parse(req.body ?? {});
       next();
     } catch (err) {
       next(err);

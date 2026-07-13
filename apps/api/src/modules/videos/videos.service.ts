@@ -160,7 +160,22 @@ export const videosService = {
       };
     }
 
-    const { playbackId, token } = await getSignedPlayback(video.providerVideoId);
+    // Direct uploads store the upload id until complete; resolve to the asset when needed.
+    let assetId = video.providerVideoId;
+    if (video.status === 'uploading' || video.status === 'processing') {
+      const creds = video.uploadCredentials as { uploadId?: string } | null;
+      if (creds?.uploadId) {
+        assetId = (await resolveUploadAssetId(creds.uploadId)) ?? assetId;
+        if (assetId !== video.providerVideoId) {
+          await db()
+            .update(schema.videos)
+            .set({ providerVideoId: assetId, updatedAt: new Date() })
+            .where(eq(schema.videos.lessonId, lessonId));
+        }
+      }
+    }
+
+    const { playbackId, token } = await getSignedPlayback(assetId);
     return { provider: VIDEO.PROVIDER, playbackId, token };
   },
 };

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { GraduationCap } from 'lucide-react';
 import { Container } from '@learnova/ui';
+import { Logo } from '@/components/logo';
 
 export function Footer() {
   return (
@@ -8,9 +8,7 @@ export function Footer() {
       <Container className="grid gap-8 py-12 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-              <GraduationCap size={18} />
-            </span>
+            <Logo variant="mark" height={32} />
             Learnova
           </div>
           <p className="mt-3 max-w-xs text-sm text-slate-500">

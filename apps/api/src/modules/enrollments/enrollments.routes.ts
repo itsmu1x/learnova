@@ -31,6 +31,13 @@ enrollmentsRouter.post(
 );
 
 enrollmentsRouter.get(
+  '/:courseId/status',
+  asyncHandler(async (req, res) =>
+    sendOk(res, await enrollmentsService.getStatus(req.user!.id, req.params.courseId!)),
+  ),
+);
+
+enrollmentsRouter.get(
   '/:courseId/progress',
   asyncHandler(async (req, res) =>
     sendOk(res, await enrollmentsService.getCourseProgress(req.user!.id, req.params.courseId!)),

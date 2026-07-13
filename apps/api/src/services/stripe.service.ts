@@ -26,10 +26,20 @@ interface CourseCheckoutArgs {
   courseId: string;
   courseTitle: string;
   priceCents: number;
+  /** Web keeps https URLs; mobile returns via custom scheme into the app. */
+  client?: 'web' | 'mobile';
 }
 
 export async function createCourseCheckout(args: CourseCheckoutArgs): Promise<{ url: string; sessionId: string }> {
   const env = getEnv();
+  const isMobile = args.client === 'mobile';
+  const successUrl = isMobile
+    ? `learnova://learn/${args.courseId}?purchase=success`
+    : `${env.WEB_URL}/learn/${args.courseId}?purchase=success`;
+  const cancelUrl = isMobile
+    ? `learnova://purchase/cancelled`
+    : `${env.WEB_URL}/courses?purchase=cancelled`;
+
   const session = await getStripe().checkout.sessions.create({
     mode: 'payment',
     customer_email: args.userEmail,
@@ -44,8 +54,8 @@ export async function createCourseCheckout(args: CourseCheckoutArgs): Promise<{ 
       },
     ],
     metadata: { type: 'course', userId: args.userId, courseId: args.courseId },
-    success_url: `${env.WEB_URL}/learn/${args.courseId}?purchase=success`,
-    cancel_url: `${env.WEB_URL}/courses/${args.courseId}?purchase=cancelled`,
+    success_url: successUrl,
+    cancel_url: cancelUrl,
   });
   if (!session.url) throw new InternalError('Failed to create Stripe checkout session');
   return { url: session.url, sessionId: session.id };
@@ -73,7 +83,26 @@ export async function createSubscriptionCheckout(
   return { url: session.url, sessionId: session.id };
 }
 
-export function constructWebhookEvent(payload: Buffer, signature: string): Stripe.Event {
+export function constructWebhookEvent(payload: Buffer | string, signature: string): Stripe.Event {
   const env = getEnv();
-  return getStripe().webhooks.constructEvent(payload, signature, env.STRIPE_WEBHOOK_SECRET);
+  const secret = env.STRIPE_WEBHOOK_SECRET?.trim();
+  if (!secret) {
+    throw new InternalError(
+      'STRIPE_WEBHOOK_SECRET is missing. For local dev, run `stripe listen --forward-to localhost:4000/api/v1/payments/webhook` and copy the printed whsec_… into .env (then restart the API).',
+    );
+  }
+
+  // Stripe signs the exact bytes on the wire — never a re-serialized object.
+  const raw = Buffer.isBuffer(payload) ? payload : Buffer.from(payload, 'utf8');
+
+  try {
+    return getStripe().webhooks.constructEvent(raw, signature, secret);
+  } catch (error) {
+    if (error instanceof Stripe.errors.StripeSignatureVerificationError) {
+      throw new Error(
+        `${error.message} If you use \`stripe listen\`, put the printed whsec_ into STRIPE_WEBHOOK_SECRET (not the Dashboard endpoint secret), then restart the API.`,
+      );
+    }
+    throw error;
+  }
 }

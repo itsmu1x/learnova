@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@learnova/ui', '@learnova/shared'],
+  transpilePackages: ['@learnova/ui', '@learnova/shared', '@mux/mux-player', '@mux/mux-player-react'],
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'ik.imagekit.io' },

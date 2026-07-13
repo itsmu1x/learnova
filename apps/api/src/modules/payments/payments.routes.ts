@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { Permission, toPageMeta } from '@learnova/shared';
 import { asyncHandler } from '../../core/http/async-handler.js';
 import { authenticate } from '../../core/middleware/authenticate.js';
 import { authorize } from '../../core/middleware/authorize.js';
+import { validate } from '../../core/middleware/validate.js';
 import { sendOk } from '../../core/http/responses.js';
 import { resolvePage } from '../../utils/pagination.js';
 import { paymentsService } from './payments.service.js';
@@ -13,11 +15,22 @@ paymentsRouter.use(authenticate);
 
 paymentsRouter.post(
   '/checkout/course/:courseId',
+  validate({
+    body: z
+      .object({
+        client: z.enum(['web', 'mobile']).optional(),
+      })
+      .default({}),
+  }),
   asyncHandler(async (req, res) =>
-    sendOk(res, await paymentsService.checkoutCourse(
-      { id: req.user!.id, email: req.user!.email },
-      req.params.courseId!,
-    )),
+    sendOk(
+      res,
+      await paymentsService.checkoutCourse(
+        { id: req.user!.id, email: req.user!.email },
+        req.params.courseId!,
+        { client: req.body?.client },
+      ),
+    ),
   ),
 );
 

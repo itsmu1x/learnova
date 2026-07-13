@@ -14,7 +14,11 @@ import { recordAudit } from '../audit/audit.service.js';
 import { logger } from '../../core/logger.js';
 
 export const paymentsService = {
-  async checkoutCourse(user: { id: string; email: string }, courseId: string) {
+  async checkoutCourse(
+    user: { id: string; email: string },
+    courseId: string,
+    options: { client?: 'web' | 'mobile' } = {},
+  ) {
     const course = await coursesRepository.findById(courseId);
     if (!course) throw new NotFoundError('Course not found');
     if (course.priceCents === 0) throw new BadRequestError('This course is free — just enroll');
@@ -43,10 +47,16 @@ export const paymentsService = {
       })
       .returning();
 
+    const client = options.client === 'mobile' ? 'mobile' : 'web';
+
     // Dev fallback: no Stripe → immediately succeed and enroll.
     if (!isStripeConfigured()) {
       await this.fulfillCoursePurchase(user.id, courseId, purchase!.id, null);
-      return { devMode: true, url: `${getEnv().WEB_URL}/learn/${courseId}?purchase=success` };
+      const url =
+        client === 'mobile'
+          ? `learnova://learn/${courseId}?purchase=success`
+          : `${getEnv().WEB_URL}/learn/${courseId}?purchase=success`;
+      return { devMode: true, url };
     }
 
     const { url, sessionId } = await createCourseCheckout({
@@ -55,6 +65,7 @@ export const paymentsService = {
       courseId,
       courseTitle: course.title,
       priceCents: course.priceCents,
+      client,
     });
     await db()
       .insert(schema.payments)

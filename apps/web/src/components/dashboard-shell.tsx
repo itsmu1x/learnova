@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@learnova/ui';
 import { ArrowLeft, LogOut } from 'lucide-react';
+import { Logo } from '@/components/logo';
 import { useAuth } from '@/lib/auth-context';
 
 export interface DashboardNavItem {
@@ -30,9 +31,7 @@ export function DashboardShell({ badge, nav, children }: DashboardShellProps) {
     <div className="flex min-h-screen bg-slate-100/80 dark:bg-slate-950">
       <aside className="fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col border-r border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex h-16 items-center gap-3 border-b border-slate-200/80 px-5 dark:border-slate-800">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white">
-            L
-          </div>
+          <Logo variant="mark" height={36} />
           <div>
             <p className="text-sm font-bold text-slate-900 dark:text-white">Learnova</p>
             <p className="text-[11px] font-medium uppercase tracking-wider text-indigo-600">{badge}</p>

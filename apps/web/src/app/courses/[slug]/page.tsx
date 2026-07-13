@@ -45,10 +45,23 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
 
           <div className="lg:col-span-1">
             <Card className="text-slate-900 dark:text-white">
-              <div className="aspect-video rounded-t-2xl bg-gradient-to-br from-indigo-500 to-violet-600" />
+              {course.thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={course.thumbnailUrl}
+                  alt={course.title}
+                  className="aspect-video w-full rounded-t-2xl object-cover"
+                />
+              ) : (
+                <div className="aspect-video rounded-t-2xl bg-gradient-to-br from-indigo-500 to-violet-600" />
+              )}
               <CardBody className="space-y-4">
                 <div className="text-3xl font-bold">
-                  {course.priceCents === 0 ? 'Free' : formatPrice(course.priceCents)}
+                  {course.isPro
+                    ? 'Included with Pro'
+                    : course.priceCents === 0
+                      ? 'Free'
+                      : formatPrice(course.priceCents)}
                 </div>
                 <EnrollButton courseId={course.id} priceCents={course.priceCents} isPro={course.isPro} />
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">

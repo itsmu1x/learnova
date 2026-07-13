@@ -103,5 +103,7 @@ npm run start -w @learnova/web   # next start
 
 ```bash
 stripe listen --forward-to localhost:4000/api/v1/payments/webhook
-# copy the printed whsec_... into STRIPE_WEBHOOK_SECRET
+# Copy the printed whsec_… into STRIPE_WEBHOOK_SECRET, then restart the API.
+# Do not use the Dashboard endpoint signing secret with `stripe listen` —
+# they are different keys and will return 400 signature errors.
 ```
