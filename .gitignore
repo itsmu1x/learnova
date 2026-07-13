@@ -39,9 +39,10 @@ apps/mobile/ios/Pods/
 apps/mobile/android/.gradle/
 apps/mobile/**/GeneratedPluginRegistrant.*
 
-# Uploads / temp
+# Uploads / temp (runtime dirs — not the API uploads module)
 tmp/
-uploads/
+/uploads/
+apps/*/uploads/
 
 # local temp
 .tmp-xdg/
