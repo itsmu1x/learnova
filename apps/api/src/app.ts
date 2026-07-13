@@ -1,4 +1,4 @@
-import express, { type Application } from 'express';
+import express, { type Application, type RequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -12,12 +12,15 @@ import { buildApiRouter } from './router.js';
 import { stripeWebhookHandler } from './modules/payments/webhook.js';
 import { asyncHandler } from './core/http/async-handler.js';
 
+// Vercel's TS pass resolves helmet's dual CJS/ESM types as a non-callable namespace.
+const applyHelmet = helmet as unknown as () => RequestHandler;
+
 export function createApp(): Application {
   const app = express();
   const env = getEnv();
 
   app.set('trust proxy', 1);
-  app.use(helmet());
+  app.use(applyHelmet());
   app.use(
     cors({
       origin: [env.WEB_URL],
