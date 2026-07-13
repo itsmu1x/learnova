@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../state/auth_state.dart';
+import '../widgets/brand_logo.dart';
 import '../widgets/page_insets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -61,19 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   top: 0,
                   child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.school_rounded, size: 48, color: Colors.white),
-                      ),
+                      const BrandLogo(variant: BrandLogoVariant.full, height: 120),
                       const SizedBox(height: 16),
                       Text(
-                        'Learnova',
+                        _isRegister ? 'Create your account' : 'Welcome back',
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineMedium?.copyWith(
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),

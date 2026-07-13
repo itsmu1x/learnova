@@ -122,17 +122,20 @@ class Lesson {
   Lesson({
     required this.id,
     required this.title,
+    this.description,
     required this.durationSeconds,
     required this.isPreview,
   });
   final String id;
   final String title;
+  final String? description;
   final int durationSeconds;
   final bool isPreview;
 
   factory Lesson.fromJson(Map<String, dynamic> json) => Lesson(
         id: json['id'] as String,
         title: json['title'] as String,
+        description: json['description'] as String?,
         durationSeconds: (json['durationSeconds'] as num?)?.toInt() ?? 0,
         isPreview: json['isPreview'] as bool? ?? false,
       );
@@ -152,6 +155,24 @@ class Enrollment {
       course: Course.fromJson(json['course'] as Map<String, dynamic>),
     );
   }
+}
+
+class EnrollmentStatus {
+  EnrollmentStatus({
+    required this.enrolled,
+    required this.progressPercent,
+    required this.completed,
+  });
+
+  final bool enrolled;
+  final int progressPercent;
+  final bool completed;
+
+  factory EnrollmentStatus.fromJson(Map<String, dynamic> json) => EnrollmentStatus(
+        enrolled: json['enrolled'] as bool? ?? false,
+        progressPercent: (json['progressPercent'] as num?)?.toInt() ?? 0,
+        completed: json['completed'] as bool? ?? false,
+      );
 }
 
 class Certificate {

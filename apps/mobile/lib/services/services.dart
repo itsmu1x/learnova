@@ -34,10 +34,17 @@ class LearningService {
     return (data as List).map((e) => Enrollment.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<EnrollmentStatus> enrollmentStatus(String courseId) async {
+    final data = await _api.get('/enrollments/$courseId/status');
+    return EnrollmentStatus.fromJson(data as Map<String, dynamic>);
+  }
+
   Future<void> enroll(String courseId) => _api.post('/enrollments/$courseId');
 
   Future<Map<String, dynamic>> checkoutCourse(String courseId) async {
-    final data = await _api.post('/payments/checkout/course/$courseId');
+    final data = await _api.post('/payments/checkout/course/$courseId', body: {
+      'client': 'mobile',
+    });
     return data as Map<String, dynamic>;
   }
 

@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../services/services.dart';
-import '../widgets/empty_state.dart';
 import '../widgets/stat_chip.dart';
 import 'learn_screen.dart';
 
@@ -16,28 +16,74 @@ class CourseDetailScreen extends StatefulWidget {
   State<CourseDetailScreen> createState() => _CourseDetailScreenState();
 }
 
-class _CourseDetailScreenState extends State<CourseDetailScreen> {
+class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBindingObserver {
   final _courses = CourseService();
   final _learning = LearningService();
   Course? _course;
+  EnrollmentStatus? _status;
   bool _loading = true;
   bool _enrolling = false;
   String? _error;
+  String? _pendingCheckoutCourseId;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _pendingCheckoutCourseId != null) {
+      _refreshAfterCheckout(_pendingCheckoutCourseId!);
+    }
+  }
+
+  Future<void> _refreshAfterCheckout(String courseId) async {
+    try {
+      // Webhook can lag a moment behind the browser redirect.
+      for (var i = 0; i < 6; i++) {
+        final status = await _learning.enrollmentStatus(courseId);
+        if (!mounted) return;
+        if (status.enrolled) {
+          setState(() {
+            _status = status;
+            _pendingCheckoutCourseId = null;
+          });
+          _openLearn(courseId, purchaseSuccess: true);
+          return;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 800));
+      }
+    } catch (_) {
+      /* stay on detail */
+    }
   }
 
   Future<void> _load() async {
     try {
       final c = await _courses.bySlug(widget.courseSlug);
+      EnrollmentStatus? status;
+      try {
+        status = await _learning.enrollmentStatus(c.id);
+      } catch (_) {
+        status = null;
+      }
+      if (!mounted) return;
       setState(() {
         _course = c;
+        _status = status;
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;
@@ -45,26 +91,87 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     }
   }
 
+  void _openLearn(String courseId, {bool purchaseSuccess = false}) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => LearnScreen(courseId: courseId, purchaseSuccess: purchaseSuccess),
+      ),
+    );
+  }
+
   Future<void> _enroll() async {
     final course = _course!;
+    if (_status?.enrolled == true) {
+      _openLearn(course.id);
+      return;
+    }
+
+    if (course.isPro) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Subscribe to Learnova Pro on the web to unlock this course.')),
+      );
+      return;
+    }
+
     setState(() => _enrolling = true);
     try {
       if (course.isFree) {
         await _learning.enroll(course.id);
-      } else {
-        await _learning.checkoutCourse(course.id);
+        if (!mounted) return;
+        _openLearn(course.id);
+        return;
       }
+
+      final checkout = await _learning.checkoutCourse(course.id);
+      final url = checkout['url'] as String?;
+      if (url != null && url.isNotEmpty) {
+        // Deep-link success_url (learnova://…) returns here; Custom Tabs closes cleanly.
+        _pendingCheckoutCourseId = course.id;
+        final uri = Uri.parse(url);
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.inAppBrowserView,
+        );
+        if (!launched) {
+          final fallback = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          if (!fallback && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not open Stripe checkout.')),
+            );
+          }
+        }
+        return;
+      }
+
+      // Dev fallback when Stripe isn’t configured — API may enroll immediately.
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => LearnScreen(courseId: course.id)),
-      );
+      _openLearn(course.id, purchaseSuccess: true);
     } catch (e) {
+      final message = e.toString();
+      if (message.contains('Already enrolled') || message.contains('CONFLICT')) {
+        if (mounted) _openLearn(course.id);
+        return;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
       }
     } finally {
       if (mounted) setState(() => _enrolling = false);
     }
+  }
+
+  String get _ctaLabel {
+    final course = _course!;
+    final status = _status;
+    if (status?.enrolled == true) {
+      if (status!.completed) return 'Visit course';
+      if (status.progressPercent > 0) return 'Continue learning';
+      return 'Go to course';
+    }
+    if (course.isFree) return 'Enroll for free';
+    if (course.isPro) return 'Get with Pro';
+    return 'Buy now';
   }
 
   @override
@@ -77,6 +184,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     }
     final course = _course!;
     final theme = Theme.of(context);
+    final enrolled = _status?.enrolled == true;
 
     return Scaffold(
       body: CustomScrollView(
@@ -132,6 +240,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       StatChip(icon: Icons.people_outline, label: '${course.enrollmentCount} students'),
                       StatChip(icon: Icons.play_lesson_outlined, label: '${course.lessonCount} lessons'),
                       StatChip(icon: Icons.school_outlined, label: course.level),
+                      if (enrolled)
+                        const StatChip(icon: Icons.check_circle, label: 'Owned', color: AppTheme.success),
                     ],
                   ),
                   if (course.instructor != null) ...[
@@ -211,27 +321,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    course.priceLabel,
+                    enrolled
+                        ? '${_status!.progressPercent}% done'
+                        : course.isPro
+                            ? 'Pro'
+                            : course.priceLabel,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: course.isFree ? AppTheme.success : null,
+                      color: enrolled || course.isFree ? AppTheme.success : null,
                     ),
                   ),
-                  if (!course.isFree)
-                    Text('One-time purchase', style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
+                  Text(
+                    enrolled
+                        ? 'You have access'
+                        : course.isFree
+                            ? 'Free forever'
+                            : course.isPro
+                                ? 'Included with Pro'
+                                : 'One-time purchase',
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                  ),
                 ],
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: FilledButton(
                   onPressed: _enrolling ? null : _enroll,
-                  child: Text(
-                    _enrolling
-                        ? 'Please wait…'
-                        : course.isFree
-                            ? 'Enroll for free'
-                            : 'Buy now',
-                  ),
+                  child: Text(_enrolling ? 'Please wait…' : _ctaLabel),
                 ),
               ),
             ],

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../state/auth_state.dart';
+import '../widgets/brand_logo.dart';
 import '../widgets/course_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/page_insets.dart';
@@ -77,6 +78,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const BrandLogo(variant: BrandLogoVariant.mark, height: 36),
+                    const SizedBox(height: 12),
                     Text(
                       _greeting(userName),
                       style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
