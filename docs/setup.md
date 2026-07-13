@@ -87,17 +87,38 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:4000/api/v1
 | Command | Description |
 | --- | --- |
 | `npm run build` | Build all packages then apps |
+| `npm run build:api` | Build workspace packages + API |
+| `npm run build:web` | Build workspace packages + Next.js web |
 | `npm run typecheck` | Type-check every workspace project |
 | `npm run db:studio` | Open Drizzle Studio |
-| `npm run build -w @learnova/api` | Build just the API |
 
 ## Production build
 
 ```bash
 npm run build
-npm run start -w @learnova/api   # node dist/index.js
+npm run start -w @learnova/api   # node dist/index.js (local / traditional host)
 npm run start -w @learnova/web   # next start
 ```
+
+## Deploy on Vercel
+
+Use **two Vercel projects** from the same Git repo:
+
+### API (`apps/api`)
+
+1. New project → this repo  
+2. **Root Directory:** `apps/api`  
+3. Enable **Include source files outside of the Root Directory in the Build Step** (so `packages/*` are available)  
+4. Framework: Express (auto) — `vercel.json` sets install/build  
+5. Add env vars (`DATABASE_URL`, JWT secrets, `WEB_URL`, `API_URL`, Stripe, Mux, etc.)  
+6. After deploy, set Stripe webhook to `https://<api-domain>/api/v1/payments/webhook`
+
+### Web (`apps/web`)
+
+1. Second project → same repo  
+2. **Root Directory:** `apps/web`  
+3. Include files outside root (same as above)  
+4. Point `NEXT_PUBLIC_API_URL` at the API deployment URL  
 
 ## Stripe webhooks (local)
 

@@ -3,12 +3,20 @@ import { closeDb } from '@learnova/database';
 import { createApp } from './app.js';
 import { logger } from './core/logger.js';
 
-function bootstrap(): void {
-  const env = getEnv();
-  const app = createApp();
+const app = createApp();
 
-  const server = app.listen(env.API_PORT, () => {
-    logger.info(`Learnova API listening on http://localhost:${env.API_PORT}${'/api/v1'}`);
+/**
+ * Vercel runs Express as a serverless function and must receive the app via
+ * `export default`. Locally (and on traditional hosts) we still call listen().
+ */
+const isServerless = Boolean(process.env.VERCEL);
+
+if (!isServerless) {
+  const env = getEnv();
+  const port = Number(process.env.PORT) || env.API_PORT;
+
+  const server = app.listen(port, () => {
+    logger.info(`Learnova API listening on http://localhost:${port}/api/v1`);
   });
 
   const shutdown = async (signal: string): Promise<void> => {
@@ -25,4 +33,4 @@ function bootstrap(): void {
   process.on('unhandledRejection', (reason) => logger.error('Unhandled rejection', reason));
 }
 
-bootstrap();
+export default app;

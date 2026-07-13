@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npm run build -w @learnova/api",
+  "functions": {
+    "src/index.ts": {
+      "maxDuration": 60,
+      "includeFiles": "assets/**"
+    }
+  }
+}
