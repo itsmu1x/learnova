@@ -1,13 +1,27 @@
 import type { Metadata } from 'next';
+import { IBM_Plex_Sans, Syne } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/lib/auth-context';
 import { SiteChrome } from '@/components/site-chrome';
 
+const plex = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex',
+  display: 'swap',
+});
+
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-syne',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Learnova — Learn without limits',
-  description:
-    'Premium video courses with AI-powered learning, secure streaming, and certificates.',
+  title: 'Learnova — Learn with intent',
+  description: 'Video courses, an AI tutor, and verifiable certificates — built for focused learning.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32' },
@@ -17,9 +31,8 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
-    title: 'Learnova — Learn without limits',
-    description:
-      'Premium video courses with AI-powered learning, secure streaming, and certificates.',
+    title: 'Learnova — Learn with intent',
+    description: 'Video courses, an AI tutor, and verifiable certificates — built for focused learning.',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Learnova' }],
   },
   twitter: {
@@ -31,7 +44,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen font-sans">
+      <body className={`${plex.variable} ${syne.variable} min-h-screen font-sans antialiased`}>
         <ThemeProvider>
           <AuthProvider>
             <SiteChrome>{children}</SiteChrome>

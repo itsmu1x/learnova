@@ -51,7 +51,7 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Already have an account?{' '}
-            <Link href="/login" className="font-semibold text-indigo-600 hover:underline">Log in</Link>
+            <Link href="/login" className="font-semibold text-signal hover:underline">Log in</Link>
           </p>
         </CardBody>
       </Card>

@@ -15,33 +15,44 @@ export function Navbar() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/80">
+    <header className="sticky top-0 z-40 border-b border-paper-line/80 bg-paper/85 backdrop-blur-md dark:border-slate-800/80 dark:bg-paper-ink/85">
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-          <Logo variant="mark" height={36} priority />
-          <span className="text-lg">Learnova</span>
+        <Link href="/" className="flex items-center gap-2.5 text-paper-ink dark:text-white">
+          <Logo variant="mark" height={32} priority />
+          <span className="font-display text-lg font-semibold tracking-tight">Learnova</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex dark:text-slate-300">
-          <Link href="/courses" className="hover:text-indigo-600">Courses</Link>
-          <Link href="/pricing" className="hover:text-indigo-600">Pricing</Link>
+        <nav className="hidden items-center gap-7 text-sm font-medium text-paper-mute md:flex">
+          <Link href="/courses" className="transition-colors hover:text-paper-ink dark:hover:text-white">
+            Courses
+          </Link>
+          <Link href="/pricing" className="transition-colors hover:text-paper-ink dark:hover:text-white">
+            Pricing
+          </Link>
           {user && can('VIEW_INSTRUCTOR_PANEL') ? (
-            <Link href="/instructor" className="hover:text-indigo-600">Teach</Link>
+            <Link href="/instructor" className="transition-colors hover:text-paper-ink dark:hover:text-white">
+              Teach
+            </Link>
           ) : null}
           {user && can('VIEW_ADMIN_PANEL') ? (
-            <Link href="/admin" className="hover:text-indigo-600">Admin</Link>
+            <Link href="/admin" className="transition-colors hover:text-paper-ink dark:hover:text-white">
+              Admin
+            </Link>
           ) : null}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Link href="/search" className="hidden rounded-xl p-2 text-slate-500 hover:bg-slate-100 sm:block dark:hover:bg-slate-800">
+        <div className="flex items-center gap-1.5">
+          <Link
+            href="/search"
+            className="hidden rounded-md p-2 text-paper-mute transition-colors hover:bg-black/5 hover:text-paper-ink sm:block dark:hover:bg-white/10 dark:hover:text-white"
+          >
             <Search size={18} />
           </Link>
           {mounted ? (
             <button
               aria-label="Toggle theme"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="rounded-md p-2 text-paper-mute transition-colors hover:bg-black/5 hover:text-paper-ink dark:hover:bg-white/10 dark:hover:text-white"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -50,11 +61,13 @@ export function Navbar() {
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/dashboard">
-                <Button variant="secondary" size="sm">Dashboard</Button>
+                <Button variant="secondary" size="sm" className="rounded-md">
+                  Dashboard
+                </Button>
               </Link>
               <button
                 onClick={() => void logout()}
-                className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                className="px-2 text-sm font-medium text-paper-mute transition-colors hover:text-paper-ink dark:hover:text-white"
               >
                 Sign out
               </button>
@@ -62,10 +75,14 @@ export function Navbar() {
           ) : (
             <div className="flex items-center gap-2">
               <Link href="/login">
-                <Button variant="ghost" size="sm">Log in</Button>
+                <Button variant="ghost" size="sm" className="rounded-md">
+                  Log in
+                </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm">Get started</Button>
+                <Button size="sm" className="rounded-md">
+                  Get started
+                </Button>
               </Link>
             </div>
           )}

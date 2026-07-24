@@ -64,7 +64,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="font-semibold text-indigo-600 hover:underline">Sign up</Link>
+            <Link href="/register" className="font-semibold text-signal hover:underline">Sign up</Link>
           </p>
           <p className="mt-3 text-center text-xs text-slate-400">
             Demo: student@learnova.dev / Password123

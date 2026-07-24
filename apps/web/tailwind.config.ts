@@ -9,16 +9,38 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Inter', 'sans-serif'],
+        sans: ['var(--font-plex)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-syne)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
+        paper: {
+          DEFAULT: '#F3F4F6',
+          elev: '#FFFFFF',
+          ink: '#0B0D12',
+          mute: '#5C6578',
+          line: '#D8DCE6',
         },
+        signal: {
+          DEFAULT: '#0057FF',
+          soft: '#E8F0FF',
+          deep: '#003FBB',
+        },
+        brand: {
+          50: '#E8F0FF',
+          100: '#D1E0FF',
+          500: '#0057FF',
+          600: '#0057FF',
+          700: '#003FBB',
+        },
+      },
+      keyframes: {
+        'fade-up': {
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'fade-up': 'fade-up 0.7s ease-out both',
       },
     },
   },

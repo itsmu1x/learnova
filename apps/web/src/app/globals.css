@@ -3,13 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --background: 248 250 252;
-  --foreground: 15 23 42;
+  --background: 243 244 246;
+  --foreground: 11 13 18;
+  --paper: #f3f4f6;
+  --ink: #0b0d12;
+  --mute: #5c6578;
+  --line: #d8dce6;
+  --signal: #0057ff;
 }
 
 .dark {
-  --background: 2 6 23;
-  --foreground: 226 232 240;
+  --background: 11 13 18;
+  --foreground: 236 238 242;
+  --paper: #0b0d12;
+  --ink: #eceef2;
+  --mute: #9aa3b5;
+  --line: #2a3140;
+  --signal: #4d8bff;
 }
 
 body {
@@ -22,7 +32,77 @@ body {
   .text-balance {
     text-wrap: balance;
   }
-  .gradient-hero {
-    background-image: radial-gradient(60% 60% at 50% 0%, rgba(99, 102, 241, 0.15), transparent 70%);
+
+  .landing-mesh {
+    background:
+      radial-gradient(90% 70% at 100% 0%, color-mix(in srgb, var(--signal) 18%, transparent), transparent 55%),
+      radial-gradient(70% 50% at 0% 100%, color-mix(in srgb, var(--signal) 10%, transparent), transparent 50%),
+      var(--paper);
+  }
+
+  .landing-grid {
+    background-color: #ffffff;
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .dark .landing-grid {
+    background-color: #12151c;
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--line) 40%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--line) 40%, transparent) 1px, transparent 1px);
+  }
+
+  .landing-signal-wash {
+    background: linear-gradient(180deg, #e8f0ff 0%, #f3f4f6 100%);
+  }
+
+  .dark .landing-signal-wash {
+    background: linear-gradient(180deg, #0f1a33 0%, #0b0d12 100%);
+  }
+
+  .landing-solid {
+    background-color: #ffffff;
+  }
+
+  .dark .landing-solid {
+    background-color: #0f1218;
+  }
+
+  .text-clip-brand {
+    background-image: linear-gradient(
+      115deg,
+      #003fbb 0%,
+      #0057ff 35%,
+      #4d8bff 55%,
+      #0057ff 75%,
+      #002a8a 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .delay-1 {
+    animation-delay: 80ms;
+  }
+  .delay-2 {
+    animation-delay: 160ms;
+  }
+  .delay-3 {
+    animation-delay: 240ms;
+  }
+  .delay-4 {
+    animation-delay: 320ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none !important;
   }
 }

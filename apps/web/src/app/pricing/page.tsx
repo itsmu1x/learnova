@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Check } from 'lucide-react';
-import { Button, Card, CardBody, Container } from '@learnova/ui';
+import { Button, Container } from '@learnova/ui';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 
@@ -27,40 +26,52 @@ export default function PricingPage() {
   }
 
   return (
-    <Container className="py-16">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Simple, transparent pricing</h1>
-        <p className="mt-3 text-slate-500">Start free, or unlock everything with Learnova Pro.</p>
-      </div>
+    <div className="landing-mesh min-h-[70vh]">
+      <Container className="py-16 md:py-24">
+        <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-signal">Pricing</p>
+        <h1 className="mt-3 max-w-xl font-display text-4xl font-semibold tracking-tight text-paper-ink md:text-5xl dark:text-white">
+          Pay for access, not noise.
+        </h1>
+        <p className="mt-4 max-w-lg text-paper-mute">
+          Start free. Upgrade when you want every Pro course unlocked.
+        </p>
 
-      <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
-        <Card>
-          <CardBody className="p-8">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Free</h2>
-            <p className="mt-2 text-4xl font-bold text-slate-900 dark:text-white">$0</p>
-            <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-              {['Access to free courses', 'AI tutor', 'Certificates', 'Buy courses individually'].map((f) => (
-                <li key={f} className="flex items-center gap-2"><Check size={16} className="text-emerald-500" /> {f}</li>
+        <div className="mt-14 grid max-w-4xl gap-6 md:grid-cols-2">
+          <div className="border border-paper-line bg-paper-elev p-8 dark:border-slate-800 dark:bg-slate-950">
+            <h2 className="font-display text-xl font-semibold text-paper-ink dark:text-white">Free</h2>
+            <p className="mt-3 font-display text-4xl font-semibold tracking-tight text-paper-ink dark:text-white">
+              $0
+            </p>
+            <ul className="mt-8 space-y-3 text-sm text-paper-mute">
+              {['Free courses', 'AI tutor', 'Certificates', 'Buy courses individually'].map((f) => (
+                <li key={f} className="flex gap-3">
+                  <span className="text-signal">→</span>
+                  {f}
+                </li>
               ))}
             </ul>
-          </CardBody>
-        </Card>
+          </div>
 
-        <Card className="border-indigo-300 ring-1 ring-indigo-200 dark:border-indigo-800">
-          <CardBody className="p-8">
-            <h2 className="text-xl font-semibold text-indigo-600">Learnova Pro</h2>
-            <p className="mt-2 text-4xl font-bold text-slate-900 dark:text-white">$19<span className="text-base font-normal text-slate-500">/mo</span></p>
-            <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-              {['Everything in Free', 'Unlimited access to all Pro courses', 'Priority AI tutor', 'New courses every month'].map((f) => (
-                <li key={f} className="flex items-center gap-2"><Check size={16} className="text-emerald-500" /> {f}</li>
+          <div className="border border-signal bg-paper-elev p-8 dark:bg-slate-950">
+            <h2 className="font-display text-xl font-semibold text-signal">Pro</h2>
+            <p className="mt-3 font-display text-4xl font-semibold tracking-tight text-paper-ink dark:text-white">
+              $19
+              <span className="text-base font-medium text-paper-mute"> / month</span>
+            </p>
+            <ul className="mt-8 space-y-3 text-sm text-paper-mute">
+              {['Everything in Free', 'All Pro courses', 'Priority AI tutor', 'New courses monthly'].map((f) => (
+                <li key={f} className="flex gap-3">
+                  <span className="text-signal">→</span>
+                  {f}
+                </li>
               ))}
             </ul>
-            <Button className="mt-8 w-full" onClick={subscribe} disabled={loading}>
+            <Button className="mt-10 w-full rounded-md" onClick={subscribe} disabled={loading}>
               {loading ? 'Redirecting…' : 'Go Pro'}
             </Button>
-          </CardBody>
-        </Card>
-      </div>
-    </Container>
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 }
