@@ -7,6 +7,7 @@ import { authController } from './auth.controller.js';
 import {
   forgotPasswordSchema,
   loginSchema,
+  registerInstructorSchema,
   registerSchema,
   resetPasswordSchema,
   verifyEmailSchema,
@@ -19,6 +20,12 @@ authRouter.post(
   authRateLimiter,
   validate({ body: registerSchema }),
   asyncHandler(authController.register),
+);
+authRouter.post(
+  '/register-instructor',
+  authRateLimiter,
+  validate({ body: registerInstructorSchema }),
+  asyncHandler(authController.registerInstructor),
 );
 authRouter.post(
   '/login',

@@ -8,6 +8,34 @@
       "when": 1783527825333,
       "tag": "0000_loud_slipstream",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785000000001,
+      "tag": "0001_role_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785000000002,
+      "tag": "0002_video_thumbnails",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785000000003,
+      "tag": "0003_drop_video_thumbnail",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785000000004,
+      "tag": "0004_instructor_applications",
+      "breakpoints": true
     }
   ]
 }

@@ -36,7 +36,7 @@ const createSchema = z.object({
 const updateSchema = createSchema.partial().extend({
   requirements: z.array(z.string()).optional(),
   outcomes: z.array(z.string()).optional(),
-  thumbnailUrl: z.string().url().optional(),
+  thumbnailUrl: z.union([z.string().url(), z.null()]).optional(),
 });
 
 function actor(req: { user?: { id: string; permissions: bigint } }) {

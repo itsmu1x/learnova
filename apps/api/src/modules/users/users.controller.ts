@@ -32,6 +32,10 @@ export const usersController = {
     sendOk(res, await usersService.promoteToInstructor(req.user!.id, req.params.id!));
   },
 
+  async setRoles(req: Request, res: Response): Promise<void> {
+    sendOk(res, await usersService.setRoles(req.user!.id, req.params.id!, req.body.roleIds));
+  },
+
   async remove(req: Request, res: Response): Promise<void> {
     await usersService.remove(req.user!.id, req.params.id!);
     sendOk(res, { deleted: true });

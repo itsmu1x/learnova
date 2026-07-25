@@ -17,6 +17,7 @@ import { aiRouter } from './modules/ai/ai.routes.js';
 import { uploadsRouter } from './modules/uploads/uploads.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
 import { analyticsRouter } from './modules/analytics/analytics.routes.js';
+import { instructorApplicationsRouter } from './modules/instructor-applications/instructor-applications.routes.js';
 
 /** Builds the versioned API router mounted at /api/v1. */
 export function buildApiRouter(): Router {
@@ -47,6 +48,7 @@ export function buildApiRouter(): Router {
   router.use('/uploads', uploadsRouter);
   router.use('/audit', auditRouter);
   router.use('/analytics', analyticsRouter);
+  router.use('/instructor-applications', instructorApplicationsRouter);
 
   return router;
 }

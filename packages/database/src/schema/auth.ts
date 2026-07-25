@@ -3,6 +3,7 @@ import {
   bigint,
   boolean,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -10,7 +11,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { authProviderEnum, timestamps, tokenTypeEnum } from './_shared.js';
+import { authProviderEnum, timestamps, tokenTypeEnum, instructorApplicationStatusEnum } from './_shared.js';
 
 export const users = pgTable(
   'users',
@@ -44,6 +45,8 @@ export const roles = pgTable(
     name: varchar('name', { length: 120 }).notNull(),
     description: text('description'),
     isSystem: boolean('is_system').default(false).notNull(),
+    /** 1–100 authority rank. Higher outranks lower; used for admin hierarchy. */
+    power: integer('power').default(10).notNull(),
     // Bitwise permission mask stored as BIGINT.
     permissions: bigint('permissions', { mode: 'bigint' })
       .default(sql`0`)
@@ -137,5 +140,39 @@ export const authTokens = pgTable(
   (t) => ({
     hashIdx: index('auth_tokens_hash_idx').on(t.tokenHash),
     userTypeIdx: index('auth_tokens_user_type_idx').on(t.userId, t.type),
+  }),
+);
+
+/**
+ * Students apply to teach; admins review and approve/reject.
+ * On approve, the applicant is granted the instructor role.
+ */
+export const instructorApplications = pgTable(
+  'instructor_applications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: instructorApplicationStatusEnum('status').default('pending').notNull(),
+    /** Display name at time of application (may update profile too). */
+    fullName: varchar('full_name', { length: 160 }).notNull(),
+    headline: varchar('headline', { length: 200 }),
+    bio: text('bio'),
+    expertise: text('expertise').notNull(),
+    motivation: text('motivation').notNull(),
+    experienceYears: integer('experience_years'),
+    portfolioUrl: text('portfolio_url'),
+    linkedinUrl: text('linkedin_url'),
+    certificateUrl: text('certificate_url'),
+    certificateFileName: varchar('certificate_file_name', { length: 255 }),
+    adminNote: text('admin_note'),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => ({
+    userIdx: index('instructor_applications_user_idx').on(t.userId),
+    statusIdx: index('instructor_applications_status_idx').on(t.status),
   }),
 );

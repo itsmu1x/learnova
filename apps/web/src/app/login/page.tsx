@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Github } from 'lucide-react';
 import { Button, Input } from '@learnova/ui';
 import { AuthShell } from '@/components/auth-shell';
+import { DemoAccounts } from '@/components/demo-accounts';
 import { API_URL } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 
@@ -105,9 +106,13 @@ export default function LoginPage() {
           Sign up
         </Link>
       </p>
-      <p className="mt-5 text-xs text-[#5C6578]/80 dark:text-slate-500">
-        Demo: student@learnova.dev / Password123
-      </p>
+      <DemoAccounts
+        onPick={(email, password) => {
+          setEmail(email);
+          setPassword(password);
+          setError(null);
+        }}
+      />
     </AuthShell>
   );
 }

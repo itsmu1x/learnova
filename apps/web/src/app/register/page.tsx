@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Button, Input } from '@learnova/ui';
 import { AuthShell } from '@/components/auth-shell';
+import { DemoAccounts } from '@/components/demo-accounts';
 import { useAuth } from '@/lib/auth-context';
 
 function passwordScore(password: string) {
@@ -124,6 +125,13 @@ export default function RegisterPage() {
           Log in
         </Link>
       </p>
+      <p className="mt-3 text-sm text-[#5C6578] dark:text-slate-400">
+        Want to teach?{' '}
+        <Link href="/register/instructor" className="font-semibold text-[#0057FF] hover:underline dark:text-[#4D8BFF]">
+          Instructor signup
+        </Link>
+      </p>
+      <DemoAccounts />
     </AuthShell>
   );
 }

@@ -65,6 +65,27 @@ export const usersRepository = {
     return rows.map((r) => r.slug);
   },
 
+  /** Full role rows assigned to a user (for admin UI + power checks). */
+  async getUserRoles(userId: string) {
+    return db()
+      .select({
+        id: schema.roles.id,
+        slug: schema.roles.slug,
+        name: schema.roles.name,
+        power: schema.roles.power,
+        isSystem: schema.roles.isSystem,
+      })
+      .from(schema.userRoles)
+      .innerJoin(schema.roles, eq(schema.userRoles.roleId, schema.roles.id))
+      .where(eq(schema.userRoles.userId, userId));
+  },
+
+  async getUserPower(userId: string): Promise<number> {
+    const roles = await this.getUserRoles(userId);
+    if (roles.length === 0) return 0;
+    return Math.max(...roles.map((r) => r.power));
+  },
+
   /**
    * Effective permission bitmask = bitwise OR of every role's mask. Computed in
    * the database with `bit_or` for efficiency.
@@ -90,6 +111,15 @@ export const usersRepository = {
     await db()
       .delete(schema.userRoles)
       .where(and(eq(schema.userRoles.userId, userId), eq(schema.userRoles.roleId, roleId)));
+  },
+
+  /** Replace the user's role set with the given role IDs. */
+  async setUserRoles(userId: string, roleIds: string[], assignedBy: string): Promise<void> {
+    await db().delete(schema.userRoles).where(eq(schema.userRoles.userId, userId));
+    if (roleIds.length === 0) return;
+    await db()
+      .insert(schema.userRoles)
+      .values(roleIds.map((roleId) => ({ userId, roleId, assignedBy })));
   },
 
   async list(params: { limit: number; offset: number; search?: string }) {

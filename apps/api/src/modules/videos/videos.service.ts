@@ -6,11 +6,15 @@ import { coursesService } from '../courses/courses.service.js';
 import { coursesRepository } from '../courses/courses.repository.js';
 import {
   createDirectUpload,
+  getAssetPlaybackId,
   getAssetStatus,
+  getMuxThumbnailFetchUrl,
   getSignedPlayback,
   isMuxConfigured,
+  muxThumbnailUrl,
   resolveUploadAssetId,
 } from '../../services/mux.service.js';
+import { isImageKitConfigured, uploadImageFromUrl } from '../../services/imagekit.service.js';
 
 interface Actor {
   id: string;
@@ -33,6 +37,44 @@ function mapMuxStatus(status: string): 'processing' | 'ready' | 'failed' {
   return 'processing';
 }
 
+/** Persist Mux playback id; optionally seed the course cover when it is empty. */
+async function finalizeReadyAsset(
+  lessonId: string,
+  courseId: string,
+  assetId: string,
+): Promise<string | null> {
+  const playbackId = await getAssetPlaybackId(assetId);
+  if (!playbackId) return null;
+
+  await db()
+    .update(schema.videos)
+    .set({ playbackId, updatedAt: new Date() })
+    .where(eq(schema.videos.lessonId, lessonId));
+
+  const course = await coursesRepository.findById(courseId);
+  if (course && !course.thumbnailUrl) {
+    let thumbnailUrl = muxThumbnailUrl(playbackId);
+    if (isImageKitConfigured()) {
+      try {
+        const muxFetchUrl = await getMuxThumbnailFetchUrl(playbackId);
+        thumbnailUrl = await uploadImageFromUrl(
+          muxFetchUrl,
+          `course-${courseId}.jpg`,
+          '/learnova/course-thumbs',
+        );
+      } catch {
+        thumbnailUrl = muxThumbnailUrl(playbackId);
+      }
+    }
+    await db()
+      .update(schema.courses)
+      .set({ thumbnailUrl, updatedAt: new Date() })
+      .where(eq(schema.courses.id, courseId));
+  }
+
+  return playbackId;
+}
+
 export const videosService = {
   /** Instructor: request a Mux direct-upload URL for the lesson video. */
   async initUpload(actor: Actor, lessonId: string, title: string) {
@@ -53,6 +95,7 @@ export const videosService = {
       .set({
         provider: VIDEO.PROVIDER,
         providerVideoId: uploadId,
+        playbackId: null,
         status: 'uploading',
         uploadCredentials: { uploadId, uploadUrl },
         updatedAt: new Date(),
@@ -113,13 +156,23 @@ export const videosService = {
     if (!video?.providerVideoId) throw new NotFoundError('No Mux asset associated');
 
     if (!isMuxConfigured()) {
-      return { status: video.status, providerStatus: 'dev' };
+      return { status: video.status, providerStatus: 'dev', playbackId: video.playbackId };
     }
 
     const providerStatus = await getAssetStatus(video.providerVideoId);
     const status = mapMuxStatus(providerStatus);
-    await db().update(schema.videos).set({ status }).where(eq(schema.videos.lessonId, lessonId));
-    return { status, providerStatus };
+
+    let playbackId = video.playbackId;
+    if (status === 'ready' && !playbackId) {
+      playbackId = await finalizeReadyAsset(lessonId, lesson.courseId, video.providerVideoId);
+    }
+
+    await db()
+      .update(schema.videos)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(schema.videos.lessonId, lessonId));
+
+    return { status, providerStatus, playbackId };
   },
 
   /**
@@ -176,6 +229,21 @@ export const videosService = {
     }
 
     const { playbackId, token } = await getSignedPlayback(assetId);
-    return { provider: VIDEO.PROVIDER, playbackId, token };
+
+    if (!video.playbackId || video.playbackId !== playbackId) {
+      await db()
+        .update(schema.videos)
+        .set({ playbackId, updatedAt: new Date() })
+        .where(eq(schema.videos.lessonId, lessonId));
+      if (!course?.thumbnailUrl) {
+        await finalizeReadyAsset(lessonId, lesson.courseId, assetId);
+      }
+    }
+
+    return {
+      provider: VIDEO.PROVIDER,
+      playbackId,
+      token,
+    };
   },
 };

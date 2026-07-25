@@ -4,6 +4,7 @@ import {
   buildGoogleAuthUrl,
   exchangeGithubCode,
   exchangeGoogleCode,
+  parseDuration,
 } from '@learnova/auth';
 import { BadRequestError } from '@learnova/shared';
 import { getEnv, TOKENS, isProduction } from '@learnova/config';
@@ -18,32 +19,51 @@ function requestMeta(req: Request) {
 }
 
 function setAuthCookies(res: Response, tokens: AuthTokens): void {
+  const env = getEnv();
   const secure = isProduction();
+  // Cross-origin web ↔ API (e.g. Vercel + Render) needs SameSite=None; Secure.
+  const sameSite = secure ? 'none' : 'lax';
+  let accessMaxAge = 15 * 60 * 1000;
+  let refreshMaxAge = 30 * 24 * 3600 * 1000;
+  try {
+    accessMaxAge = parseDuration(env.JWT_ACCESS_TTL);
+    refreshMaxAge = parseDuration(env.JWT_REFRESH_TTL);
+  } catch {
+    /* keep defaults */
+  }
+
   res.cookie(TOKENS.ACCESS_COOKIE, tokens.accessToken, {
     httpOnly: true,
     secure,
-    sameSite: 'lax',
-    maxAge: 15 * 60 * 1000,
+    sameSite,
+    maxAge: accessMaxAge,
     path: '/',
   });
   res.cookie(TOKENS.REFRESH_COOKIE, tokens.refreshToken, {
     httpOnly: true,
     secure,
-    sameSite: 'lax',
-    maxAge: 30 * 24 * 3600 * 1000,
+    sameSite,
+    maxAge: refreshMaxAge,
     path: '/',
   });
 }
 
 function clearAuthCookies(res: Response): void {
-  res.clearCookie(TOKENS.ACCESS_COOKIE, { path: '/' });
-  res.clearCookie(TOKENS.REFRESH_COOKIE, { path: '/' });
+  const secure = isProduction();
+  const sameSite = secure ? 'none' : 'lax';
+  res.clearCookie(TOKENS.ACCESS_COOKIE, { path: '/', secure, sameSite });
+  res.clearCookie(TOKENS.REFRESH_COOKIE, { path: '/', secure, sameSite });
 }
 
 export const authController = {
   async register(req: Request, res: Response): Promise<void> {
     const result = await authService.register(req.body, requestMeta(req));
     setAuthCookies(res, result);
+    sendOk(res, result, 201);
+  },
+
+  async registerInstructor(req: Request, res: Response): Promise<void> {
+    const result = await authService.registerInstructor(req.body);
     sendOk(res, result, 201);
   },
 

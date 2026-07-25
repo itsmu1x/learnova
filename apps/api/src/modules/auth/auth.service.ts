@@ -1,4 +1,4 @@
-import { schema, eq } from '@learnova/database';
+import { schema, and, desc, eq, isNull } from '@learnova/database';
 import {
   createOpaqueToken,
   createRefreshToken,
@@ -24,6 +24,7 @@ import { db } from '../../core/database.js';
 import { usersRepository, type UserRow } from '../users/users.repository.js';
 import { authRepository } from './auth.repository.js';
 import {
+  instructorPendingEmail,
   passwordResetEmail,
   sendEmail,
   verificationEmail,
@@ -125,6 +126,80 @@ export const authService = {
     return issueSession(user, meta);
   },
 
+  /**
+   * Instructor signup: account is created inactive until an admin approves.
+   * No session cookies — the applicant must wait for the approval email.
+   */
+  async registerInstructor(
+    input: {
+      name: string;
+      email: string;
+      password: string;
+      headline?: string;
+      bio?: string;
+      expertise: string;
+      motivation: string;
+      experienceYears?: number;
+      portfolioUrl?: string;
+      linkedinUrl?: string;
+      certificateUrl?: string;
+      certificateFileName?: string;
+    },
+  ): Promise<{ pending: true; email: string }> {
+    if (!isStrongPassword(input.password)) {
+      throw new ValidationError(
+        'Password must be at least 8 characters and include upper, lower and a number',
+      );
+    }
+    const existing = await usersRepository.findByEmail(input.email);
+    if (existing) throw new ConflictError('An account with this email already exists');
+
+    const passwordHash = await hashPassword(input.password);
+    const user = await usersRepository.create({
+      name: input.name,
+      email: input.email,
+      passwordHash,
+      provider: 'local',
+      headline: input.headline ?? null,
+      bio: input.bio ?? null,
+      isActive: false,
+      emailVerified: true,
+    });
+
+    const [app] = await db()
+      .insert(schema.instructorApplications)
+      .values({
+        userId: user.id,
+        fullName: input.name,
+        headline: input.headline ?? null,
+        bio: input.bio ?? null,
+        expertise: input.expertise,
+        motivation: input.motivation,
+        experienceYears: input.experienceYears ?? null,
+        portfolioUrl: input.portfolioUrl ?? null,
+        linkedinUrl: input.linkedinUrl ?? null,
+        certificateUrl: input.certificateUrl ?? null,
+        certificateFileName: input.certificateFileName ?? null,
+        status: 'pending',
+      })
+      .returning();
+
+    await recordAudit({
+      actorId: user.id,
+      action: 'instructor_application.submit',
+      entityType: 'instructor_application',
+      entityId: app!.id,
+    });
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Learnova — we received your instructor application',
+      html: instructorPendingEmail(user.name),
+    });
+
+    return { pending: true, email: user.email };
+  },
+
   async login(
     input: { email: string; password: string },
     meta: RequestMeta,
@@ -136,6 +211,10 @@ export const authService = {
     if (user.isBanned) throw new UnauthorizedError('This account has been suspended');
     const valid = await verifyPassword(input.password, user.passwordHash);
     if (!valid) throw new UnauthorizedError('Invalid email or password');
+
+    if (!user.isActive) {
+      throw new UnauthorizedError(await this.inactiveAccountMessage(user.id));
+    }
 
     await usersRepository.update(user.id, { lastLoginAt: new Date() });
     return issueSession(user, meta);
@@ -165,22 +244,37 @@ export const authService = {
         await assignDefaultRole(user.id, SystemRole.STUDENT);
       }
     }
+    if (user.isBanned) throw new UnauthorizedError('This account has been suspended');
+    if (!user.isActive) {
+      throw new UnauthorizedError(await this.inactiveAccountMessage(user.id));
+    }
     return issueSession(user, meta);
   },
 
   /**
-   * Refresh-token rotation: the presented token is verified, revoked, and a new
-   * token pair is issued. Reuse of an already-rotated token is impossible
-   * because only active (non-revoked) tokens are accepted.
+   * Refresh-token rotation with a short grace window so concurrent tabs that
+   * present the same refresh token don't invalidate each other.
    */
   async refresh(refreshToken: string, meta: RequestMeta): Promise<AuthTokens> {
     const tokenHash = hashToken(refreshToken);
-    const stored = await authRepository.findActiveToken(tokenHash, 'refresh');
+    let stored = await authRepository.findActiveToken(tokenHash, 'refresh');
     if (!stored || stored.expiresAt < new Date()) {
-      throw new UnauthorizedError('Invalid or expired refresh token');
+      const raced = await authRepository.findRecentlyRevokedRefresh(tokenHash, 30_000);
+      if (!raced || raced.expiresAt < new Date()) {
+        throw new UnauthorizedError('Invalid or expired refresh token');
+      }
+      stored = raced;
     }
+
     const user = await usersRepository.findById(stored.userId);
     if (!user) throw new UnauthorizedError('User no longer exists');
+    if (user.isBanned || !user.isActive) {
+      throw new UnauthorizedError(
+        !user.isActive
+          ? await this.inactiveAccountMessage(user.id)
+          : 'Account is not allowed to sign in',
+      );
+    }
 
     const { roles, mask } = await usersRepository.getEffectivePermissions(user.id);
     const accessToken = signAccessToken({
@@ -200,7 +294,10 @@ export const authService = {
       userAgent: meta.userAgent ?? null,
       ipAddress: meta.ipAddress ?? null,
     });
-    await authRepository.revokeToken(stored.id, created.id);
+    // Only revoke when the presented token is still active (avoid double-revoke).
+    if (!stored.revokedAt) {
+      await authRepository.revokeToken(stored.id, created.id);
+    }
 
     return { accessToken, refreshToken: newRefresh };
   },
@@ -280,7 +377,36 @@ export const authService = {
   async me(userId: string): Promise<AuthenticatedUser> {
     const user = await usersRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
+    if (!user.isActive || user.isBanned) {
+      throw new UnauthorizedError(
+        !user.isActive
+          ? await this.inactiveAccountMessage(user.id)
+          : 'This account has been suspended',
+      );
+    }
     const { roles, mask } = await usersRepository.getEffectivePermissions(user.id);
     return toAuthenticatedUser(user, roles, mask);
+  },
+
+  async inactiveAccountMessage(userId: string): Promise<string> {
+    const [app] = await db()
+      .select({ status: schema.instructorApplications.status })
+      .from(schema.instructorApplications)
+      .where(
+        and(
+          eq(schema.instructorApplications.userId, userId),
+          isNull(schema.instructorApplications.deletedAt),
+        ),
+      )
+      .orderBy(desc(schema.instructorApplications.createdAt))
+      .limit(1);
+
+    if (app?.status === 'pending') {
+      return 'Your instructor application is still under review. Please wait for our approval email before signing in.';
+    }
+    if (app?.status === 'rejected') {
+      return 'Your instructor application was not approved, so this account cannot sign in. Check your email for details.';
+    }
+    return 'This account is not active yet. Please contact support if you need help.';
   },
 };

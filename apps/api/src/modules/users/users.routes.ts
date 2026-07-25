@@ -21,6 +21,10 @@ const adminUpdateSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+const setRolesSchema = z.object({
+  roleIds: z.array(z.string().uuid()),
+});
+
 usersRouter.use(authenticate);
 
 // Self-service
@@ -35,6 +39,12 @@ usersRouter.patch(
   authorize(Permission.MANAGE_USERS),
   validate({ body: adminUpdateSchema }),
   asyncHandler(usersController.adminUpdate),
+);
+usersRouter.put(
+  '/:id/roles',
+  authorize(Permission.MANAGE_USERS),
+  validate({ body: setRolesSchema }),
+  asyncHandler(usersController.setRoles),
 );
 usersRouter.post(
   '/:id/promote-instructor',

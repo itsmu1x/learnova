@@ -29,7 +29,16 @@ async function seed(): Promise<void> {
         kind: perm.kind,
         bit: perm.bit,
       })
-      .onConflictDoNothing({ target: schema.permissions.key });
+      .onConflictDoUpdate({
+        target: schema.permissions.key,
+        set: {
+          label: perm.label,
+          description: perm.description,
+          category: perm.category,
+          kind: perm.kind,
+          bit: perm.bit,
+        },
+      });
   }
   const allPermissions = await db.select().from(schema.permissions);
 
@@ -42,11 +51,17 @@ async function seed(): Promise<void> {
         name: role.name,
         description: role.description,
         isSystem: role.isSystem,
+        power: role.power,
         permissions: role.permissions,
       })
       .onConflictDoUpdate({
         target: schema.roles.slug,
-        set: { permissions: role.permissions, name: role.name },
+        set: {
+          permissions: role.permissions,
+          name: role.name,
+          description: role.description,
+          power: role.power,
+        },
       });
   }
   const roleRows = await db.select().from(schema.roles);

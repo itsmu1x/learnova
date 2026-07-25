@@ -52,11 +52,17 @@ export const Permission = {
   // --- Reviews & catalog ---
   MODERATE_REVIEWS: bit(19),
   MANAGE_CATEGORIES: bit(20),
+  VIEW_CATEGORIES: bit(28),
 
   // --- Elevated management ---
   CREATE_INSTRUCTOR: bit(21),
   MANAGE_SUBSCRIPTIONS: bit(22),
   ISSUE_CERTIFICATE: bit(23),
+
+  // --- Instructor applications ---
+  VIEW_INSTRUCTOR_APPLICATIONS: bit(29),
+  MANAGE_INSTRUCTOR_APPLICATIONS: bit(30),
+  APPLY_INSTRUCTOR: bit(31),
 
   // --- Student capabilities ---
   VIEW_STUDENT_PANEL: bit(24),
@@ -98,8 +104,12 @@ export const PERMISSION_CATALOG: PermissionMeta[] = [
   { key: 'MANAGE_LESSONS', bit: Permission.MANAGE_LESSONS, label: 'Manage lessons', description: 'Create and organise lessons.', category: 'instructor', kind: 'action' },
   { key: 'VIEW_ANALYTICS', bit: Permission.VIEW_ANALYTICS, label: 'View analytics', description: 'View revenue and engagement analytics.', category: 'instructor', kind: 'page' },
   { key: 'MODERATE_REVIEWS', bit: Permission.MODERATE_REVIEWS, label: 'Moderate reviews', description: 'Hide or remove reviews.', category: 'admin', kind: 'action' },
-  { key: 'MANAGE_CATEGORIES', bit: Permission.MANAGE_CATEGORIES, label: 'Manage categories', description: 'Create and edit course categories.', category: 'admin', kind: 'action' },
+  { key: 'VIEW_CATEGORIES', bit: Permission.VIEW_CATEGORIES, label: 'View categories', description: 'Browse course categories in the instructor panel.', category: 'instructor', kind: 'page' },
+  { key: 'MANAGE_CATEGORIES', bit: Permission.MANAGE_CATEGORIES, label: 'Manage categories', description: 'Create, edit, and delete course categories.', category: 'instructor', kind: 'action' },
   { key: 'CREATE_INSTRUCTOR', bit: Permission.CREATE_INSTRUCTOR, label: 'Create instructor', description: 'Promote a user to instructor.', category: 'admin', kind: 'action' },
+  { key: 'VIEW_INSTRUCTOR_APPLICATIONS', bit: Permission.VIEW_INSTRUCTOR_APPLICATIONS, label: 'View instructor applications', description: 'Review pending instructor signups.', category: 'admin', kind: 'page' },
+  { key: 'MANAGE_INSTRUCTOR_APPLICATIONS', bit: Permission.MANAGE_INSTRUCTOR_APPLICATIONS, label: 'Manage instructor applications', description: 'Approve or decline instructor signups.', category: 'admin', kind: 'action' },
+  { key: 'APPLY_INSTRUCTOR', bit: Permission.APPLY_INSTRUCTOR, label: 'Instructor signup', description: 'Legacy bit — instructor signup is public; kept for catalog stability.', category: 'system', kind: 'action' },
   { key: 'MANAGE_SUBSCRIPTIONS', bit: Permission.MANAGE_SUBSCRIPTIONS, label: 'Manage subscriptions', description: 'Manage Learnova Pro subscriptions.', category: 'admin', kind: 'action' },
   { key: 'ISSUE_CERTIFICATE', bit: Permission.ISSUE_CERTIFICATE, label: 'Issue certificate', description: 'Manually issue certificates.', category: 'admin', kind: 'action' },
   { key: 'VIEW_STUDENT_PANEL', bit: Permission.VIEW_STUDENT_PANEL, label: 'View student panel', description: 'Access the student learning area.', category: 'student', kind: 'page' },

@@ -63,6 +63,40 @@ export async function getAssetStatus(assetId: string): Promise<MuxAssetStatus> {
   return asset.status as MuxAssetStatus;
 }
 
+export async function getAssetPlaybackId(assetId: string): Promise<string | null> {
+  const mux = getMux();
+  const asset = await mux.video.assets.retrieve(assetId);
+  return asset.playback_ids?.[0]?.id ?? null;
+}
+
+const THUMB_PARAMS: Record<string, string> = { time: '1', width: '1280' };
+
+/** Unsigned Mux Image API URL (works when the playback policy is public). */
+export function muxThumbnailUrl(playbackId: string): string {
+  const q = new URLSearchParams(THUMB_PARAMS);
+  return `https://image.mux.com/${playbackId}/thumbnail.jpg?${q.toString()}`;
+}
+
+/**
+ * Returns a fetchable Mux thumbnail URL. When signing keys are configured the
+ * asset uses a signed policy, so the URL includes a short-lived thumbnail JWT.
+ */
+export async function getMuxThumbnailFetchUrl(playbackId: string): Promise<string> {
+  const env = getEnv();
+  const base = muxThumbnailUrl(playbackId);
+  if (!env.MUX_SIGNING_KEY_ID || !env.MUX_SIGNING_KEY_PRIVATE_KEY) return base;
+
+  const mux = getMux();
+  const token = await mux.jwt.signPlaybackId(playbackId, {
+    keyId: env.MUX_SIGNING_KEY_ID,
+    keySecret: env.MUX_SIGNING_KEY_PRIVATE_KEY,
+    expiration: '1h',
+    type: 'thumbnail',
+    params: THUMB_PARAMS,
+  });
+  return `${base}&token=${token}`;
+}
+
 export interface MuxPlayback {
   playbackId: string;
   token: string | null;
@@ -84,6 +118,7 @@ export async function getSignedPlayback(assetId: string): Promise<MuxPlayback> {
       keyId: env.MUX_SIGNING_KEY_ID,
       keySecret: env.MUX_SIGNING_KEY_PRIVATE_KEY,
       expiration: '2h',
+      type: 'video',
     });
     return { playbackId, token };
   }

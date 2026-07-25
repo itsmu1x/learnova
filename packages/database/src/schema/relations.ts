@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import {
   authTokens,
+  instructorApplications,
   permissions,
   rolePermissions,
   roles,
@@ -33,7 +34,16 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   certificates: many(certificates),
   purchases: many(purchases),
   authTokens: many(authTokens),
+  instructorApplications: many(instructorApplications),
   subscription: one(subscriptions),
+}));
+
+export const instructorApplicationsRelations = relations(instructorApplications, ({ one }) => ({
+  user: one(users, { fields: [instructorApplications.userId], references: [users.id] }),
+  reviewer: one(users, {
+    fields: [instructorApplications.reviewedBy],
+    references: [users.id],
+  }),
 }));
 
 export const rolesRelations = relations(roles, ({ many }) => ({

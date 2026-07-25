@@ -31,6 +31,20 @@ export const authRepository = {
     return row;
   },
 
+  /** Used to heal concurrent refresh races (two tabs rotating the same token). */
+  async findRecentlyRevokedRefresh(tokenHash: string, withinMs: number) {
+    const [row] = await db()
+      .select()
+      .from(schema.authTokens)
+      .where(
+        and(eq(schema.authTokens.tokenHash, tokenHash), eq(schema.authTokens.type, 'refresh')),
+      )
+      .limit(1);
+    if (!row?.revokedAt || !row.replacedById) return undefined;
+    if (Date.now() - row.revokedAt.getTime() > withinMs) return undefined;
+    return row;
+  },
+
   async revokeToken(id: string, replacedById?: string): Promise<void> {
     await db()
       .update(schema.authTokens)

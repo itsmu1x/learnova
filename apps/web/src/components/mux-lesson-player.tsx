@@ -15,12 +15,14 @@ interface PlaybackPayload {
 interface MuxLessonPlayerProps {
   lessonId: string | null;
   title?: string;
+  /** Course cover used as the player poster (not per-lesson). */
+  posterUrl?: string | null;
 }
 
 /**
  * Fetches a signed Mux playback token and mounts the official Mux web player.
  */
-export function MuxLessonPlayer({ lessonId, title }: MuxLessonPlayerProps) {
+export function MuxLessonPlayer({ lessonId, title, posterUrl }: MuxLessonPlayerProps) {
   const [playback, setPlayback] = useState<PlaybackPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -100,6 +102,7 @@ export function MuxLessonPlayer({ lessonId, title }: MuxLessonPlayerProps) {
         key={playback.playbackId + (playback.token ?? '')}
         playbackId={playback.playbackId}
         tokens={playback.token ? { playback: playback.token } : undefined}
+        poster={posterUrl ?? undefined}
         streamType="on-demand"
         metadata={{ video_title: title }}
         accentColor="#4f46e5"

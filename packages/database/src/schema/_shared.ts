@@ -54,3 +54,10 @@ export const tokenTypeEnum = pgEnum('token_type', [
   'email_verification',
   'password_reset',
 ]);
+
+export const instructorApplicationStatusEnum = pgEnum('instructor_application_status', [
+  'pending',
+  'approved',
+  'rejected',
+  'withdrawn',
+]);

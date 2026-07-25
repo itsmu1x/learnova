@@ -17,12 +17,14 @@ const createSchema = z.object({
   name: z.string().min(2).max(120),
   description: z.string().max(500).optional(),
   permissionKeys: z.array(permissionKeyEnum).default([]),
+  power: z.number().int().min(1).max(100),
 });
 
 const updateSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   description: z.string().max(500).optional(),
   permissionKeys: z.array(permissionKeyEnum).optional(),
+  power: z.number().int().min(1).max(100).optional(),
 });
 
 rolesRouter.use(authenticate);

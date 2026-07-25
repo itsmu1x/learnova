@@ -76,7 +76,11 @@ function LearnInner({ courseId }: { courseId: string }) {
   return (
     <div className="grid lg:grid-cols-[1fr_360px]">
       <div className="min-h-screen">
-        <MuxLessonPlayer lessonId={activeLessonId} title={activeLesson?.title} />
+        <MuxLessonPlayer
+          lessonId={activeLessonId}
+          title={activeLesson?.title}
+          posterUrl={course.thumbnailUrl}
+        />
 
         <Container className="py-8">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{activeLesson?.title}</h1>

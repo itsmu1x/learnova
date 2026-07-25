@@ -27,6 +27,7 @@ import {
 import { apiFetch } from '@/lib/api';
 import { Protected } from '@/components/protected';
 import { VideoUploader } from '@/components/video-uploader';
+import { ThumbnailUpload } from '@/components/thumbnail-upload';
 import type { Category, CourseDetail } from '@/lib/types';
 
 interface LessonFull {
@@ -35,7 +36,7 @@ interface LessonFull {
   description: string | null;
   isPreview: boolean;
   durationSeconds: number;
-  video: { status: string } | null;
+  video: { status: string; playbackId?: string | null } | null;
 }
 
 type Tab = 'curriculum' | 'settings';
@@ -164,7 +165,7 @@ function ManageInner({ id }: { id: string }) {
         title,
         subtitle: subtitle || undefined,
         description: description || undefined,
-        thumbnailUrl: thumbnailUrl || undefined,
+        thumbnailUrl: thumbnailUrl || null,
         level,
         priceCents: Math.round(parseFloat(priceUsd || '0') * 100),
         categoryId: categoryId || undefined,
@@ -257,8 +258,7 @@ function ManageInner({ id }: { id: string }) {
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} />
             </div>
             <div>
-              <Label>Thumbnail URL</Label>
-              <Input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} placeholder="https://..." />
+              <ThumbnailUpload value={thumbnailUrl} onChange={setThumbnailUrl} />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
@@ -405,7 +405,15 @@ function ManageInner({ id }: { id: string }) {
                   initialStatus={lessonDetail.video?.status}
                   onStatusChange={(status) =>
                     setLessonDetail((prev) =>
-                      prev ? { ...prev, video: { status } } : prev,
+                      prev
+                        ? {
+                            ...prev,
+                            video: {
+                              ...(prev.video ?? { status }),
+                              status,
+                            },
+                          }
+                        : prev,
                     )
                   }
                 />

@@ -117,7 +117,7 @@ export const lessons = pgTable(
 
 /**
  * Videos are always hosted by an external provider (Mux). We never store
- * raw files — only the provider, provider video id and processing status.
+ * raw files — only provider ids, status, and a derived thumbnail URL.
  */
 export const videos = pgTable(
   'videos',
@@ -128,6 +128,8 @@ export const videos = pgTable(
       .references(() => lessons.id, { onDelete: 'cascade' }),
     provider: varchar('provider', { length: 32 }).default('mux').notNull(),
     providerVideoId: varchar('provider_video_id', { length: 191 }),
+    /** Mux playback id once the asset is ready. */
+    playbackId: varchar('playback_id', { length: 191 }),
     status: videoStatusEnum('status').default('pending').notNull(),
     durationSeconds: integer('duration_seconds').default(0).notNull(),
     uploadCredentials: jsonb('upload_credentials').$type<Record<string, unknown> | null>(),

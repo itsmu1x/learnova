@@ -13,6 +13,8 @@ export interface RoleDefinition {
   name: string;
   description: string;
   isSystem: boolean;
+  /** 1–100 authority rank. Higher outranks lower. */
+  power: number;
   permissions: bigint;
 }
 
@@ -33,6 +35,8 @@ const INSTRUCTOR_PERMISSIONS = combine(
   Permission.UPLOAD_VIDEO,
   Permission.MANAGE_LESSONS,
   Permission.VIEW_ANALYTICS,
+  Permission.VIEW_CATEGORIES,
+  Permission.MANAGE_CATEGORIES,
 );
 
 // Admin holds every defined permission bit.
@@ -44,6 +48,7 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     name: 'Student',
     description: 'Default role for learners.',
     isSystem: true,
+    power: 10,
     permissions: STUDENT_PERMISSIONS,
   },
   {
@@ -51,6 +56,7 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     name: 'Instructor',
     description: 'Can create and manage their own courses.',
     isSystem: true,
+    power: 40,
     permissions: INSTRUCTOR_PERMISSIONS,
   },
   {
@@ -58,6 +64,7 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     name: 'Admin',
     description: 'Full platform administration access.',
     isSystem: true,
+    power: 100,
     permissions: ADMIN_PERMISSIONS,
   },
 ];
@@ -77,6 +84,24 @@ export const DEFAULT_ROLE_PERMISSION_KEYS: Record<SystemRoleSlug, PermissionKey[
     'UPLOAD_VIDEO',
     'MANAGE_LESSONS',
     'VIEW_ANALYTICS',
+    'VIEW_CATEGORIES',
+    'MANAGE_CATEGORIES',
   ],
   admin: [],
 };
+
+/** Max power among a list of role powers (0 if empty). */
+export function maxRolePower(powers: number[]): number {
+  if (powers.length === 0) return 0;
+  return Math.max(...powers);
+}
+
+/** True when the actor may mutate a user whose max role power is `targetPower`. */
+export function canManageByPower(actorPower: number, targetPower: number): boolean {
+  return actorPower > targetPower;
+}
+
+/** True when the actor may assign a role of the given power. */
+export function canAssignRolePower(actorPower: number, rolePower: number): boolean {
+  return actorPower > rolePower;
+}

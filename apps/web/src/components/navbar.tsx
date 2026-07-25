@@ -33,6 +33,10 @@ export function Navbar() {
             <Link href="/instructor" className="transition-colors hover:text-paper-ink dark:hover:text-white">
               Teach
             </Link>
+          ) : !user ? (
+            <Link href="/register/instructor" className="transition-colors hover:text-paper-ink dark:hover:text-white">
+              Teach
+            </Link>
           ) : null}
           {user && can('VIEW_ADMIN_PANEL') ? (
             <Link href="/admin" className="transition-colors hover:text-paper-ink dark:hover:text-white">

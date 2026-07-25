@@ -12,7 +12,7 @@ export interface ImageKitAuthParams {
 
 export function isImageKitConfigured(): boolean {
   const env = getEnv();
-  return Boolean(env.IMAGEKIT_PRIVATE_KEY && env.IMAGEKIT_PUBLIC_KEY);
+  return Boolean(env.IMAGEKIT_PRIVATE_KEY && env.IMAGEKIT_PUBLIC_KEY && env.IMAGEKIT_URL_ENDPOINT);
 }
 
 /**
@@ -37,4 +37,38 @@ export function getImageKitAuthParams(): ImageKitAuthParams {
     publicKey: env.IMAGEKIT_PUBLIC_KEY,
     urlEndpoint: env.IMAGEKIT_URL_ENDPOINT,
   };
+}
+
+/**
+ * Server-side upload from a remote URL (e.g. Mux thumbnail). ImageKit fetches
+ * the source and returns a permanent public CDN URL.
+ */
+export async function uploadImageFromUrl(
+  sourceUrl: string,
+  fileName: string,
+  folder = '/learnova/video-thumbs',
+): Promise<string> {
+  const env = getEnv();
+  if (!isImageKitConfigured()) {
+    throw new InternalError('ImageKit is not configured');
+  }
+
+  const body = new FormData();
+  body.append('file', sourceUrl);
+  body.append('fileName', fileName);
+  body.append('folder', folder);
+  body.append('useUniqueFileName', 'true');
+
+  const auth = Buffer.from(`${env.IMAGEKIT_PRIVATE_KEY}:`).toString('base64');
+  const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+    method: 'POST',
+    headers: { Authorization: `Basic ${auth}` },
+    body,
+  });
+
+  const json = (await res.json().catch(() => null)) as { url?: string; message?: string } | null;
+  if (!res.ok || !json?.url) {
+    throw new InternalError(json?.message ?? 'ImageKit upload failed');
+  }
+  return json.url;
 }

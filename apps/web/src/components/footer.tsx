@@ -37,7 +37,7 @@ export function Footer() {
             title="Trust"
             links={[
               ['Verify certificate', '/verify/certificate'],
-              ['Teach', '/instructor'],
+              ['Become an instructor', '/register/instructor'],
             ]}
           />
         </div>
