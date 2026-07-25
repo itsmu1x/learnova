@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Github } from 'lucide-react';
-import { Button, Card, CardBody, Container, Input } from '@learnova/ui';
-import { Logo } from '@/components/logo';
+import { Button, Input } from '@learnova/ui';
+import { AuthShell } from '@/components/auth-shell';
 import { API_URL } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 
@@ -31,46 +31,83 @@ export default function LoginPage() {
   }
 
   return (
-    <Container className="flex min-h-[70vh] items-center justify-center py-12">
-      <Card className="w-full max-w-md">
-        <CardBody className="p-8">
-          <div className="mb-6 flex justify-center">
-            <Logo variant="full" height={96} priority />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
-          <p className="mt-1 text-sm text-slate-500">Log in to continue learning.</p>
+    <AuthShell mode="login">
+      <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-[#0B0D12] dark:text-white sm:text-3xl">
+        Welcome back
+      </h1>
+      <p className="mt-2 text-sm leading-relaxed text-[#5C6578] dark:text-slate-400">
+        Log in to continue learning.
+      </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <a href={`${API_URL}/auth/oauth/google`}>
-              <Button variant="outline" className="w-full">Google</Button>
-            </a>
-            <a href={`${API_URL}/auth/oauth/github`}>
-              <Button variant="outline" className="w-full gap-2"><Github size={16} /> GitHub</Button>
-            </a>
-          </div>
+      <div className="mt-9 grid grid-cols-2 gap-3">
+        <a href={`${API_URL}/auth/oauth/google`}>
+          <Button
+            variant="outline"
+            className="w-full rounded-none border-[#D8DCE6] bg-transparent hover:border-[#0057FF] dark:border-slate-600"
+          >
+            Google
+          </Button>
+        </a>
+        <a href={`${API_URL}/auth/oauth/github`}>
+          <Button
+            variant="outline"
+            className="w-full gap-2 rounded-none border-[#D8DCE6] bg-transparent hover:border-[#0057FF] dark:border-slate-600"
+          >
+            <Github size={16} /> GitHub
+          </Button>
+        </a>
+      </div>
 
-          <div className="my-6 flex items-center gap-3 text-xs text-slate-400">
-            <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" /> or <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-          </div>
+      <div className="my-7 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5C6578]">
+        <span className="h-px flex-1 bg-[#D8DCE6] dark:bg-slate-700" />
+        or
+        <span className="h-px flex-1 bg-[#D8DCE6] dark:bg-slate-700" />
+      </div>
 
-          <form onSubmit={onSubmit} className="space-y-4">
-            <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in…' : 'Log in'}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-500">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="font-semibold text-signal hover:underline">Sign up</Link>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <label className="block space-y-1.5">
+          <span className="font-display text-xs font-semibold uppercase tracking-wider text-[#5C6578]">Email</span>
+          <Input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className="rounded-none border-[#D8DCE6] bg-white focus-visible:ring-[#0057FF] dark:border-slate-600 dark:bg-slate-950"
+          />
+        </label>
+        <label className="block space-y-1.5">
+          <span className="font-display text-xs font-semibold uppercase tracking-wider text-[#5C6578]">Password</span>
+          <Input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            className="rounded-none border-[#D8DCE6] bg-white focus-visible:ring-[#0057FF] dark:border-slate-600 dark:bg-slate-950"
+          />
+        </label>
+        {error ? (
+          <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            {error}
           </p>
-          <p className="mt-3 text-center text-xs text-slate-400">
-            Demo: student@learnova.dev / Password123
-          </p>
-        </CardBody>
-      </Card>
-    </Container>
+        ) : null}
+        <Button type="submit" className="w-full rounded-none" size="lg" disabled={loading}>
+          {loading ? 'Signing in…' : 'Log in'}
+        </Button>
+      </form>
+
+      <p className="mt-8 text-sm text-[#5C6578] dark:text-slate-400">
+        Don&apos;t have an account?{' '}
+        <Link href="/register" className="font-semibold text-[#0057FF] hover:underline dark:text-[#4D8BFF]">
+          Sign up
+        </Link>
+      </p>
+      <p className="mt-5 text-xs text-[#5C6578]/80 dark:text-slate-500">
+        Demo: student@learnova.dev / Password123
+      </p>
+    </AuthShell>
   );
 }

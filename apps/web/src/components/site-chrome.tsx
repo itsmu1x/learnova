@@ -9,11 +9,12 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isDashboard =
     pathname?.startsWith('/instructor') || pathname?.startsWith('/admin');
+  const isAuth = pathname === '/login' || pathname === '/register';
 
   if (isDashboard) return <>{children}</>;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={`flex min-h-screen flex-col ${isAuth ? 'landing-grid' : ''}`}>
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />

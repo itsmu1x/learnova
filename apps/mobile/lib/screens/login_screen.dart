@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../state/auth_state.dart';
-import '../widgets/brand_logo.dart';
 import '../widgets/page_insets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -62,8 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   top: 0,
                   child: Column(
                     children: [
-                      const BrandLogo(variant: BrandLogoVariant.full, height: 120),
-                      const SizedBox(height: 16),
                       Text(
                         _isRegister ? 'Create your account' : 'Welcome back',
                         textAlign: TextAlign.center,
