@@ -32,7 +32,7 @@ function AdminOverview() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Admin overview</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">Admin overview</h1>
         <p className="mt-1 text-slate-500">Platform health at a glance.</p>
       </div>
 

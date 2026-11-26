@@ -3,35 +3,87 @@
 @tailwind utilities;
 
 :root {
-  --background: 243 244 246;
-  --foreground: 11 13 18;
-  --paper: #f3f4f6;
-  --ink: #0b0d12;
-  --mute: #5c6578;
-  --line: #d8dce6;
-  --signal: #0057ff;
+  --canvas: 245 246 250;
+  --surface: 255 255 255;
+  --ink: 15 26 58;
+  --mute: 94 104 132;
+  --line: 225 228 238;
+  --signal-soft: 231 237 252;
 }
 
 .dark {
-  --background: 11 13 18;
-  --foreground: 236 238 242;
-  --paper: #0b0d12;
-  --ink: #eceef2;
-  --mute: #9aa3b5;
-  --line: #2a3140;
-  --signal: #4d8bff;
+  --canvas: 12 18 36;
+  --surface: 22 29 51;
+  --ink: 236 239 247;
+  --mute: 154 162 186;
+  --line: 44 53 80;
+  --signal-soft: 27 39 82;
 }
 
 body {
-  background-color: rgb(var(--background));
-  color: rgb(var(--foreground));
+  background-color: rgb(var(--canvas));
+  color: rgb(var(--ink));
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #ffae1a;
+  color: #0f1a3a;
+}
+
+:focus-visible {
+  outline: 2px solid #2756d8;
+  outline-offset: 2px;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Faint ruled-notebook lines; used only behind the hero. */
+  .ruled {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 39px,
+      rgb(var(--line) / 0.7) 39px,
+      rgb(var(--line) / 0.7) 40px
+    );
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .delay-1 {
+    animation-delay: 90ms;
+  }
+  .delay-2 {
+    animation-delay: 180ms;
+  }
+  .delay-3 {
+    animation-delay: 270ms;
+  }
+  .delay-4 {
+    animation-delay: 360ms;
+  }
+
+  .animate-fill {
+    animation: fill 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.5s both;
+  }
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -39,85 +91,18 @@ body {
   }
 }
 
-@layer utilities {
-  .animate-fade-up {
-    animation: fade-up 0.55s ease-out both;
+@keyframes fill {
+  from {
+    transform: scaleX(0);
   }
-
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .landing-mesh {
-    background:
-      radial-gradient(90% 70% at 100% 0%, color-mix(in srgb, var(--signal) 18%, transparent), transparent 55%),
-      radial-gradient(70% 50% at 0% 100%, color-mix(in srgb, var(--signal) 10%, transparent), transparent 50%),
-      var(--paper);
-  }
-
-  .landing-grid {
-    background-color: #ffffff;
-    background-image:
-      linear-gradient(to right, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
-    background-size: 56px 56px;
-  }
-
-  .dark .landing-grid {
-    background-color: #12151c;
-    background-image:
-      linear-gradient(to right, color-mix(in srgb, var(--line) 40%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, var(--line) 40%, transparent) 1px, transparent 1px);
-  }
-
-  .landing-signal-wash {
-    background: linear-gradient(180deg, #e8f0ff 0%, #f3f4f6 100%);
-  }
-
-  .dark .landing-signal-wash {
-    background: linear-gradient(180deg, #0f1a33 0%, #0b0d12 100%);
-  }
-
-  .landing-solid {
-    background-color: #ffffff;
-  }
-
-  .dark .landing-solid {
-    background-color: #0f1218;
-  }
-
-  .text-clip-brand {
-    background-image: linear-gradient(
-      115deg,
-      #003fbb 0%,
-      #0057ff 35%,
-      #4d8bff 55%,
-      #0057ff 75%,
-      #002a8a 100%
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .delay-1 {
-    animation-delay: 80ms;
-  }
-  .delay-2 {
-    animation-delay: 160ms;
-  }
-  .delay-3 {
-    animation-delay: 240ms;
-  }
-  .delay-4 {
-    animation-delay: 320ms;
+  to {
+    transform: scaleX(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up {
+  .animate-fade-up,
+  .animate-fill {
     animation: none !important;
   }
 }

@@ -13,8 +13,8 @@ class StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: c.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: c.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -25,7 +25,7 @@ export function FeaturedSpotlight({ courses }: { courses: CourseCardType[] }) {
 
   return (
     <div
-      className="grid overflow-hidden border border-[#D8DCE6] bg-[#0B0D12] text-white dark:border-slate-700 lg:grid-cols-[1.35fr_0.65fr]"
+      className={`grid overflow-hidden rounded-4xl bg-paper-ink text-white ring-1 ring-white/5 ${picks.length > 1 ? 'lg:grid-cols-[1.4fr_0.6fr]' : ''}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -38,14 +38,12 @@ export function FeaturedSpotlight({ courses }: { courses: CourseCardType[] }) {
             className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-[1.02] group-hover:opacity-80"
           />
         ) : (
-          <div className="absolute inset-0 bg-[linear-gradient(145deg,#1a2744,#0B0D12)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(120%_100%_at_90%_10%,#2756D8_0%,#0F1A3A_65%)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D12] via-[#0B0D12]/75 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-paper-ink via-paper-ink/75 to-transparent" />
         <div className="relative flex h-full flex-col justify-end p-8 md:p-10">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-[#4D8BFF]">
-            Featured this week
-          </p>
-          <h3 className="mt-3 max-w-xl font-display text-2xl font-semibold tracking-tight md:text-4xl">
+          <p className="w-fit rounded-full bg-marigold px-3 py-1 text-xs font-bold text-paper-ink">Featured</p>
+          <h3 className="mt-4 max-w-xl text-balance font-display text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
             {course.title}
           </h3>
           {course.subtitle ? (
@@ -54,20 +52,21 @@ export function FeaturedSpotlight({ courses }: { courses: CourseCardType[] }) {
           <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/70">
             {course.instructor ? <span>{course.instructor.name}</span> : null}
             <span className="inline-flex items-center gap-1">
-              <Star size={14} className="fill-white text-white" />
+              <Star size={14} className="fill-marigold text-marigold" />
               {course.averageRating.toFixed(1)}
             </span>
             <span className="font-semibold text-white">
               {course.priceCents === 0 ? 'Free' : formatPrice(course.priceCents)}
             </span>
           </div>
-          <span className="mt-6 inline-flex w-fit items-center gap-2 bg-[#0057FF] px-5 py-2.5 font-display text-sm font-semibold transition group-hover:bg-[#003FBB]">
+          <span className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-paper-ink transition-colors group-hover:bg-marigold">
             <Play size={16} fill="currentColor" />
             View course
           </span>
         </div>
       </Link>
 
+      {picks.length > 1 ? (
       <div className="flex flex-col border-t border-white/10 lg:border-l lg:border-t-0">
         {picks.map((c, i) => {
           const active = i === index;
@@ -76,12 +75,12 @@ export function FeaturedSpotlight({ courses }: { courses: CourseCardType[] }) {
               key={c.id}
               type="button"
               onClick={() => setIndex(i)}
-              className={`flex flex-1 items-start gap-4 border-b border-white/10 px-5 py-4 text-left transition last:border-b-0 ${
+              className={`flex flex-1 items-start gap-4 border-b border-white/10 px-6 py-5 text-left transition-colors last:border-b-0 ${
                 active ? 'bg-white/10' : 'hover:bg-white/[0.04]'
               }`}
             >
               <span
-                className={`mt-1 h-2 w-2 shrink-0 rounded-full ${active ? 'bg-[#4D8BFF]' : 'bg-white/25'}`}
+                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${active ? 'bg-marigold' : 'bg-white/25'}`}
                 aria-hidden
               />
               <span className="min-w-0">
@@ -97,6 +96,7 @@ export function FeaturedSpotlight({ courses }: { courses: CourseCardType[] }) {
           );
         })}
       </div>
+      ) : null}
     </div>
   );
 }

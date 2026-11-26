@@ -40,7 +40,7 @@ export default function SearchPage() {
 
   return (
     <Container className="py-10">
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Search</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">Search</h1>
       <form onSubmit={run} className="mt-6 flex gap-2">
         <div className="relative flex-1">
           <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

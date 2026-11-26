@@ -98,16 +98,16 @@ export default function InstructorRegisterPage() {
       <AuthShell mode="register">
         <div className="text-center">
           <CheckCircle2 className="mx-auto text-emerald-500" size={40} />
-          <h1 className="mt-4 font-display text-2xl font-semibold text-[#0B0D12] dark:text-white">
+          <h1 className="mt-4 font-display text-2xl font-semibold text-paper-ink dark:text-white">
             Application received
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[#5C6578] dark:text-slate-400">
+          <p className="mt-3 text-sm leading-relaxed text-paper-mute dark:text-slate-400">
             Thanks for signing up to teach on Learnova. Please wait for our approval — we&apos;ve
             emailed <strong>{email}</strong> with next steps. You won&apos;t be able to sign in until
             an admin reviews your application.
           </p>
           <Link href="/login" className="mt-8 inline-block">
-            <Button className="rounded-none">Back to login</Button>
+            <Button>Back to login</Button>
           </Link>
         </div>
       </AuthShell>
@@ -116,10 +116,10 @@ export default function InstructorRegisterPage() {
 
   return (
     <AuthShell mode="register">
-      <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-[#0B0D12] dark:text-white sm:text-3xl">
+      <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-paper-ink dark:text-white sm:text-3xl">
         Teach on Learnova
       </h1>
-      <p className="mt-2 text-sm leading-relaxed text-[#5C6578] dark:text-slate-400">
+      <p className="mt-2 text-sm leading-relaxed text-paper-mute dark:text-slate-400">
         Create an instructor account. We&apos;ll review your application before you can sign in.
       </p>
 
@@ -220,7 +220,7 @@ export default function InstructorRegisterPage() {
             </span>
             <Input
               id="linkedin"
-              className="min-w-0 rounded-none border-0 pl-0 focus-visible:ring-0"
+              className="min-w-0 border-0 pl-0 focus-visible:ring-0"
               value={linkedinUsername}
               onChange={(e) =>
                 setLinkedinUsername(
@@ -243,7 +243,7 @@ export default function InstructorRegisterPage() {
             <Button
               type="button"
               variant="outline"
-              className="rounded-none"
+             
               disabled={uploading}
               onClick={() => fileRef.current?.click()}
             >
@@ -269,14 +269,14 @@ export default function InstructorRegisterPage() {
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-        <Button type="submit" className="w-full rounded-none" disabled={loading || uploading || score < 2}>
+        <Button type="submit" className="w-full" disabled={loading || uploading || score < 2}>
           {loading ? 'Submitting…' : 'Submit instructor application'}
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#5C6578] dark:text-slate-400">
+      <p className="mt-6 text-center text-sm text-paper-mute dark:text-slate-400">
         Want to learn instead?{' '}
-        <Link href="/register" className="font-medium text-[#0057FF] hover:underline">
+        <Link href="/register" className="font-medium text-signal hover:underline">
           Student signup
         </Link>
       </p>

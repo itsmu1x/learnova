@@ -46,7 +46,7 @@ export function RolePermissionEditor({
     <div className="space-y-5">
       {byCategory.map(([category, perms]) => (
         <section key={category}>
-          <h4 className="font-display text-xs font-semibold uppercase tracking-[0.16em] text-[#0057FF] dark:text-[#4D8BFF]">
+          <h4 className="font-display text-sm font-semibold text-paper-ink dark:text-white">
             {category}
           </h4>
           <ul className="mt-2 space-y-1">
@@ -60,7 +60,7 @@ export function RolePermissionEditor({
                     onClick={() => toggle(p.key)}
                     className={`flex w-full items-start justify-between gap-3 border px-3 py-2.5 text-left transition ${
                       on
-                        ? 'border-[#0057FF] bg-[#E8F0FF]/60 dark:border-[#4D8BFF] dark:bg-[#0f1a33]'
+                        ? 'border-signal bg-signal-soft/60 dark:border-signal-bright dark:bg-slate-900'
                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-800'
                     } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
                   >
@@ -68,7 +68,7 @@ export function RolePermissionEditor({
                       <span className="block text-sm font-medium text-slate-900 dark:text-white">{p.label}</span>
                       <span className="mt-0.5 block text-xs text-slate-500">{p.description}</span>
                     </span>
-                    <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    <span className="shrink-0 font-display text-[10px] font-semibold text-slate-400">
                       {p.kind}
                     </span>
                   </button>
@@ -80,7 +80,7 @@ export function RolePermissionEditor({
       ))}
 
       {onSave ? (
-        <Button className="w-full rounded-none" disabled={disabled || saving} onClick={onSave}>
+        <Button className="w-full" disabled={disabled || saving} onClick={onSave}>
           {saving ? 'Saving…' : 'Save permissions'}
         </Button>
       ) : null}

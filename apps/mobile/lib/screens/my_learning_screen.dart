@@ -44,7 +44,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('My learning', style: theme.textTheme.headlineSmall),
+                    Text('My learning', style: theme.textTheme.headlineMedium),
                     const SizedBox(height: 4),
                     Text(
                       'Pick up where you left off',
@@ -60,13 +60,24 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
                 }
+                if (snapshot.hasError) {
+                  return SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      icon: Icons.wifi_off_rounded,
+                      title: 'Couldn’t load your courses',
+                      subtitle: 'Check your connection and try again.',
+                      action: FilledButton(onPressed: _refresh, child: const Text('Try again')),
+                    ),
+                  );
+                }
                 final items = snapshot.data ?? [];
                 if (items.isEmpty) {
                   return const SliverFillRemaining(
                     child: EmptyState(
                       icon: Icons.play_circle_outline_rounded,
                       title: 'No courses yet',
-                      subtitle: 'Browse the catalog and enroll in your first course',
+                      subtitle: 'Find something on the Explore tab. Free courses start right away.',
                     ),
                   );
                 }
@@ -83,7 +94,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           gradient: AppTheme.heroGradient,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(24),
                         ),
                         child: Row(
                           children: [
@@ -93,7 +104,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                                 children: [
                                   Text(
                                     '${items.length} course${items.length == 1 ? '' : 's'} in progress',
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                    style: AppTheme.display(theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
                                   ),
                                   const SizedBox(height: 4),
                                   Text('$avgProgress% average progress', style: const TextStyle(color: Colors.white70)),
@@ -103,7 +114,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                             CircularProgressIndicator(
                               value: avgProgress / 100,
                               backgroundColor: Colors.white24,
-                              color: Colors.white,
+                              color: AppTheme.marigold,
                               strokeWidth: 6,
                             ),
                           ],
@@ -129,7 +140,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                                             fit: BoxFit.cover,
                                           )
                                         : Container(
-                                            decoration: const BoxDecoration(gradient: AppTheme.cardGradient),
+                                            decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
                                             alignment: Alignment.center,
                                             padding: const EdgeInsets.all(8),
                                             child: Text(
@@ -173,9 +184,9 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                                       ),
                                     ),
                                   ),
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 12),
-                                    child: Icon(Icons.play_circle_fill_rounded, color: AppTheme.indigo, size: 32),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12),
+                                    child: Icon(Icons.play_circle_fill_rounded, color: theme.colorScheme.primary, size: 32),
                                   ),
                                 ],
                               ),

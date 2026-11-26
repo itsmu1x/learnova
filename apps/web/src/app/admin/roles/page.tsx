@@ -163,7 +163,7 @@ function RolesPanel() {
         </div>
         {can('MANAGE_ROLES') ? (
           <Button
-            className="rounded-none"
+           
             onClick={() => {
               setCreating((v) => !v);
               setNewPower(Math.max(1, Math.min(99, actorPower - 1 || 20)));
@@ -177,7 +177,7 @@ function RolesPanel() {
 
       {/* Power ladder */}
       <div className="overflow-x-auto border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.16em] text-[#0057FF] dark:text-[#4D8BFF]">
+        <p className="font-display text-sm font-semibold text-paper-ink dark:text-white">
           Power ladder
         </p>
         <div className="mt-4 flex min-w-max items-end gap-3">
@@ -188,12 +188,12 @@ function RolesPanel() {
               onClick={() => setActiveId(r.id)}
               className={`flex w-28 flex-col items-center gap-2 border px-2 py-3 transition ${
                 activeId === r.id
-                  ? 'border-[#0057FF] bg-[#E8F0FF]/70 dark:border-[#4D8BFF] dark:bg-[#0f1a33]'
+                  ? 'border-signal bg-signal-soft/70 dark:border-signal-bright dark:bg-slate-900'
                   : 'border-slate-200 hover:border-slate-400 dark:border-slate-800'
               }`}
             >
               <div
-                className="w-full bg-[#0057FF]/80 dark:bg-[#4D8BFF]/70"
+                className="w-full bg-signal/80 dark:bg-signal-bright/70"
                 style={{ height: `${Math.max(12, r.power)}px` }}
               />
               <span className="text-center font-display text-xs font-semibold text-slate-900 dark:text-white">
@@ -207,17 +207,17 @@ function RolesPanel() {
       </div>
 
       {creating ? (
-        <div className="border border-[#0057FF]/30 bg-[#E8F0FF]/40 p-4 dark:bg-[#0f1a33]/40">
+        <div className="border border-signal/30 bg-signal-soft/40 p-4 dark:bg-slate-900/40">
           <h3 className="font-display text-sm font-semibold">Create custom role</h3>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Input
-              className="rounded-none"
+             
               placeholder="Role name"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
             <Input
-              className="rounded-none"
+             
               placeholder="Description"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
@@ -231,19 +231,19 @@ function RolesPanel() {
               max={Math.max(1, actorPower - 1)}
               value={newPower}
               onChange={(e) => setNewPower(Number(e.target.value))}
-              className="mt-2 w-full accent-[#0057FF]"
+              className="mt-2 w-full accent-signal"
             />
             <span className="mt-1 inline-block tabular-nums text-slate-700 dark:text-slate-300">{newPower}</span>
           </label>
           <div className="mt-3 flex gap-2">
             <Button
-              className="rounded-none"
+             
               disabled={busy || newName.trim().length < 2}
               onClick={() => void createRole()}
             >
               Create
             </Button>
-            <Button variant="outline" className="rounded-none" onClick={() => setCreating(false)}>
+            <Button variant="outline" onClick={() => setCreating(false)}>
               Cancel
             </Button>
           </div>
@@ -251,7 +251,7 @@ function RolesPanel() {
       ) : null}
 
       {error ? (
-        <div className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       ) : null}
@@ -267,7 +267,7 @@ function RolesPanel() {
                     type="button"
                     onClick={() => setActiveId(r.id)}
                     className={`flex w-full items-start justify-between gap-2 px-4 py-3 text-left transition ${
-                      activeId === r.id ? 'bg-[#E8F0FF]/70 dark:bg-[#0f1a33]' : 'hover:bg-slate-50 dark:hover:bg-slate-900'
+                      activeId === r.id ? 'bg-signal-soft/70 dark:bg-slate-900' : 'hover:bg-slate-50 dark:hover:bg-slate-900'
                     }`}
                   >
                     <span className="min-w-0">
@@ -302,7 +302,7 @@ function RolesPanel() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      className="rounded-none"
+                     
                       disabled={busy}
                       onClick={() => void deleteRole()}
                     >
@@ -325,7 +325,7 @@ function RolesPanel() {
                 <label className="block text-xs font-medium text-slate-500">
                   Name
                   <Input
-                    className="mt-1 rounded-none"
+                    className="mt-1"
                     value={draftName}
                     disabled={!canEditActive || busy}
                     onChange={(e) => setDraftName(e.target.value)}
@@ -334,7 +334,7 @@ function RolesPanel() {
                 <label className="block text-xs font-medium text-slate-500">
                   Description
                   <Input
-                    className="mt-1 rounded-none"
+                    className="mt-1"
                     value={draftDesc}
                     disabled={!canEditActive || busy}
                     onChange={(e) => setDraftDesc(e.target.value)}
@@ -352,7 +352,7 @@ function RolesPanel() {
                     value={Math.min(draftPower, Math.max(1, actorPower - 1))}
                     disabled={!canEditActive || busy}
                     onChange={(e) => setDraftPower(Number(e.target.value))}
-                    className="mt-2 w-full accent-[#0057FF]"
+                    className="mt-2 w-full accent-signal"
                   />
                   <span className="mt-1 inline-block tabular-nums text-slate-700 dark:text-slate-300">{draftPower}</span>
                 </label>

@@ -35,11 +35,17 @@ class ApiClient {
           handler.next(options);
         },
         onError: (error, handler) async {
-          if (error.response?.statusCode == 401 && !_isRefreshing) {
-            final refreshed = await _tryRefresh();
+          final opts = error.requestOptions;
+          if (error.response?.statusCode == 401 && opts.extra['retried'] != true) {
+            // All requests that 401 at the same time wait on one shared refresh.
+            final refreshed = await (_refreshing ??= _tryRefresh().whenComplete(() => _refreshing = null));
             if (refreshed) {
-              final retry = await _dio.fetch(error.requestOptions);
-              return handler.resolve(retry);
+              opts.extra['retried'] = true;
+              try {
+                return handler.resolve(await _dio.fetch(opts));
+              } on DioException catch (e) {
+                return handler.next(e);
+              }
             }
           }
           handler.next(error);
@@ -52,7 +58,7 @@ class ApiClient {
 
   late final Dio _dio;
   final _storage = const FlutterSecureStorage();
-  bool _isRefreshing = false;
+  Future<bool>? _refreshing;
 
   static const _accessKey = 'learnova_access';
   static const _refreshKey = 'learnova_refresh';
@@ -70,7 +76,6 @@ class ApiClient {
   Future<bool> hasSession() async => (await _storage.read(key: _accessKey)) != null;
 
   Future<bool> _tryRefresh() async {
-    _isRefreshing = true;
     try {
       final refresh = await _storage.read(key: _refreshKey);
       if (refresh == null) return false;
@@ -84,8 +89,6 @@ class ApiClient {
     } catch (_) {
       await clearTokens();
       return false;
-    } finally {
-      _isRefreshing = false;
     }
   }
 

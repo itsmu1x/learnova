@@ -34,7 +34,7 @@ function AuditPanel() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Audit log</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">Audit log</h1>
         <p className="mt-1 text-slate-500">Recent admin and system actions.</p>
       </div>
 

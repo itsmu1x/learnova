@@ -1,11 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Circle, Send } from 'lucide-react';
 import { Button, Container, Spinner } from '@learnova/ui';
 import { apiFetch } from '@/lib/api';
 import { MuxLessonPlayer } from '@/components/mux-lesson-player';
 import { Protected } from '@/components/protected';
+import { CheckoutNotice } from '@/components/checkout-notice';
+import { LessonStudyAids } from '@/components/lesson-study-aids';
+import { ApiRequestError } from '@/lib/api';
 import type { CourseDetail } from '@/lib/types';
 
 export default function LearnPage({ params }: { params: { courseId: string } }) {
@@ -26,6 +30,8 @@ function LearnInner({ courseId }: { courseId: string }) {
   const [progress, setProgress] = useState<Progress[]>([]);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const flatLessons = useMemo(
     () => (course ? course.curriculum.flatMap((s) => s.lessons) : []),
@@ -44,7 +50,16 @@ function LearnInner({ courseId }: { courseId: string }) {
         const first = c.curriculum.flatMap((s) => s.lessons)[0];
         setActiveLessonId(first?.id ?? null);
       })
-      .catch(() => undefined)
+      .catch((err: unknown) => {
+        const status = err instanceof ApiRequestError ? err.status : 0;
+        setLoadError(
+          status === 404
+            ? 'This course doesn’t exist or was unpublished.'
+            : status === 403
+              ? 'You’re not enrolled in this course yet.'
+              : 'We couldn’t load this course. Check your connection and try again.',
+        );
+      })
       .finally(() => setLoading(false));
     void loadProgress();
   }, [courseId, loadProgress]);
@@ -55,10 +70,15 @@ function LearnInner({ courseId }: { courseId: string }) {
   const percent = flatLessons.length ? Math.round((completedCount / flatLessons.length) * 100) : 0;
 
   async function markComplete(lessonId: string) {
-    await apiFetch(`/enrollments/lessons/${lessonId}/progress`, {
-      method: 'POST',
-      body: { completed: true },
-    }).catch(() => undefined);
+    setActionError(null);
+    try {
+      await apiFetch(`/enrollments/lessons/${lessonId}/progress`, {
+        method: 'POST',
+        body: { completed: true },
+      });
+    } catch {
+      setActionError('Couldn’t save your progress. Try marking the lesson complete again.');
+    }
     await loadProgress();
   }
 
@@ -70,7 +90,14 @@ function LearnInner({ courseId }: { courseId: string }) {
     );
   }
   if (!course) {
-    return <Container className="py-20 text-center text-slate-500">Course not found.</Container>;
+    return (
+      <Container className="py-20 text-center" role="alert">
+        <p className="text-lg text-slate-500">{loadError ?? 'Course not found.'}</p>
+        <Link href={`/courses`} className="mt-6 inline-block">
+          <Button variant="outline">Browse courses</Button>
+        </Link>
+      </Container>
+    );
   }
 
   return (
@@ -83,7 +110,13 @@ function LearnInner({ courseId }: { courseId: string }) {
         />
 
         <Container className="py-8">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{activeLesson?.title}</h1>
+          <CheckoutNotice className="mb-6" />
+          {actionError ? (
+            <p role="alert" className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+              {actionError}
+            </p>
+          ) : null}
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{activeLesson?.title}</h1>
           <div className="mt-4 flex gap-3">
             {activeLesson ? (
               <Button
@@ -95,7 +128,13 @@ function LearnInner({ courseId }: { courseId: string }) {
             ) : null}
           </div>
 
-          {activeLesson ? <AiTutor lessonId={activeLesson.id} /> : null}
+          {activeLesson ? (
+            <LessonStudyAids
+              key={activeLesson.id}
+              lessonId={activeLesson.id}
+              tutor={<AiTutor lessonId={activeLesson.id} />}
+            />
+          ) : null}
         </Container>
       </div>
 
@@ -110,7 +149,7 @@ function LearnInner({ courseId }: { courseId: string }) {
         <div className="max-h-[calc(100vh-8rem)] overflow-y-auto p-3">
           {course.curriculum.map((section) => (
             <div key={section.id} className="mb-4">
-              <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{section.title}</p>
+              <p className="px-2 py-1 text-xs font-semibold text-slate-400">{section.title}</p>
               {section.lessons.map((lesson) => (
                 <button
                   key={lesson.id}
@@ -162,7 +201,7 @@ function AiTutor({ lessonId }: { lessonId: string }) {
   }
 
   return (
-    <div className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800">
+    <div className="rounded-3xl border border-slate-200 dark:border-slate-800">
       <div className="border-b border-slate-200 px-5 py-3 font-semibold text-slate-900 dark:border-slate-800 dark:text-white">
         AI Tutor
       </div>
@@ -192,9 +231,10 @@ function AiTutor({ lessonId }: { lessonId: string }) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}
           placeholder="Ask the AI tutor…"
+          aria-label="Question for the AI tutor"
           className="flex-1 rounded-xl border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-900"
         />
-        <Button size="icon" onClick={send} disabled={loading}><Send size={16} /></Button>
+        <Button size="icon" onClick={send} disabled={loading} aria-label="Send question"><Send size={16} /></Button>
       </div>
     </div>
   );

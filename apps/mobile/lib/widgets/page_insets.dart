@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme.dart';
+
 /// Consistent horizontal page padding below the status bar / notch.
 class PageInsets extends StatelessWidget {
   const PageInsets({
@@ -24,7 +26,7 @@ class PageInsets extends StatelessWidget {
   }
 }
 
-/// Rounded gradient hero banner used at the top of tab screens.
+/// Navy hero panel with a cobalt glow, used at the top of tab screens.
 class GradientBanner extends StatelessWidget {
   const GradientBanner({super.key, required this.child, this.top = 16, this.bottom = 0});
 
@@ -39,21 +41,10 @@ class GradientBanner extends StatelessWidget {
       bottom: bottom,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF4F46E5).withOpacity(0.22),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          gradient: AppTheme.heroGradient,
+          borderRadius: BorderRadius.circular(28),
         ),
         child: child,
       ),

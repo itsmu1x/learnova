@@ -3,11 +3,18 @@ import { InternalError } from '@learnova/shared';
 import type { AICompletionOptions, AIMessage, AIService } from './types.js';
 
 export class OpenAIProvider implements AIService {
-  readonly name = 'openai';
-  constructor(private readonly apiKey: string, private readonly model = 'gpt-4o-mini') {}
+  constructor(
+    private readonly apiKey: string,
+    private readonly model = 'gpt-4o-mini',
+    // Any OpenAI-compatible chat-completions endpoint (e.g. Groq).
+    private readonly baseUrl = 'https://api.openai.com/v1',
+    readonly name = 'openai',
+    // Provider-specific request fields (e.g. Groq's reasoning_effort).
+    private readonly extraBody: Record<string, unknown> = {},
+  ) {}
 
   async chat(messages: AIMessage[], options?: AICompletionOptions): Promise<string> {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
@@ -18,9 +25,10 @@ export class OpenAIProvider implements AIService {
         messages,
         temperature: options?.temperature ?? 0.4,
         max_tokens: options?.maxTokens ?? 800,
+        ...this.extraBody,
       }),
     });
-    if (!res.ok) throw new InternalError(`OpenAI request failed (${res.status})`);
+    if (!res.ok) throw new InternalError(`${this.name} request failed (${res.status})`);
     const data = (await res.json()) as { choices: { message: { content: string } }[] };
     return data.choices[0]?.message.content ?? '';
   }
@@ -128,6 +136,19 @@ export function getAIService(): AIService {
       break;
     case 'claude':
       cached = env.ANTHROPIC_API_KEY ? new ClaudeProvider(env.ANTHROPIC_API_KEY) : new MockProvider();
+      break;
+    case 'groq':
+      cached = env.GROQ_API_KEY
+        ? new OpenAIProvider(
+            env.GROQ_API_KEY,
+            env.GROQ_MODEL,
+            'https://api.groq.com/openai/v1',
+            'groq',
+            // GPT-OSS thinks before answering, and that counts against max_tokens; keep it short
+            // so replies aren't cut off. Only GPT-OSS accepts this field.
+            env.GROQ_MODEL.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {},
+          )
+        : new MockProvider();
       break;
     default:
       cached = new MockProvider();

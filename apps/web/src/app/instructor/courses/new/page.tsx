@@ -68,7 +68,7 @@ function NewCourseInner() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Create a course</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">Create a course</h1>
         <p className="mt-1 text-slate-500">
           Set up your course details, then build curriculum and upload videos.
         </p>

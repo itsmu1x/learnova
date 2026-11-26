@@ -1,4 +1,4 @@
-package com.example.learnova
+package dev.learnova.app
 
 import io.flutter.embedding.android.FlutterActivity
 

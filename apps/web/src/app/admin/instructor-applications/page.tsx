@@ -98,7 +98,7 @@ function ApplicationsPanel() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">
           Instructor applications
         </h1>
         <p className="mt-1 text-slate-500">Review requests from learners who want to teach.</p>
@@ -127,7 +127,7 @@ function ApplicationsPanel() {
         <div className="grid gap-6 lg:grid-cols-[1fr_min(32rem,42%)] xl:grid-cols-[1fr_36rem]">
           <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/60">
+              <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-900/60">
                 <tr>
                   <th className="px-4 py-3 font-medium">Applicant</th>
                   <th className="hidden px-4 py-3 font-medium md:table-cell">Expertise</th>
@@ -306,7 +306,7 @@ function ApplicationsPanel() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</h3>
+      <h3 className="text-xs font-semibold text-slate-500">{title}</h3>
       <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{children}</p>
     </div>
   );

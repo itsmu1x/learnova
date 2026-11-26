@@ -10,6 +10,7 @@ import {
   Plus,
   Save,
   Settings,
+  Sparkles,
   Trash2,
   Video,
 } from 'lucide-react';
@@ -37,6 +38,9 @@ interface LessonFull {
   isPreview: boolean;
   durationSeconds: number;
   video: { status: string; playbackId?: string | null } | null;
+  aiSummary: string | null;
+  quiz: { questions: unknown[] } | null;
+  transcript: string | null;
 }
 
 type Tab = 'curriculum' | 'settings';
@@ -59,6 +63,7 @@ function ManageInner({ id }: { id: string }) {
   const [lessonDetail, setLessonDetail] = useState<LessonFull | null>(null);
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonDescription, setLessonDescription] = useState('');
+  const [lessonTranscript, setLessonTranscript] = useState('');
   const [lessonPreview, setLessonPreview] = useState(false);
   const [savingLesson, setSavingLesson] = useState(false);
   const [savingCourse, setSavingCourse] = useState(false);
@@ -97,6 +102,7 @@ function ManageInner({ id }: { id: string }) {
     if (l) {
       setLessonTitle(l.title);
       setLessonDescription(l.description ?? '');
+      setLessonTranscript(l.transcript ?? '');
       setLessonPreview(l.isPreview);
     }
   }, []);
@@ -111,17 +117,23 @@ function ManageInner({ id }: { id: string }) {
     else setLessonDetail(null);
   }, [selectedLessonId, loadLesson]);
 
+  const [actionError, setActionError] = useState<string | null>(null);
+  function fail(err: unknown) {
+    setActionError(`That didn’t save: ${(err as Error).message}`);
+    return false;
+  }
+
   async function publish() {
     if (!course) return;
     const next = course.status === 'published' ? 'unpublish' : 'publish';
-    await apiFetch(`/courses/${id}/${next}`, { method: 'POST' }).catch(() => undefined);
+    await apiFetch(`/courses/${id}/${next}`, { method: 'POST' }).then(() => true, fail);
     await load();
   }
 
   async function addSection() {
     if (!newSection.trim()) return;
-    await apiFetch('/sections', { method: 'POST', body: { courseId: id, title: newSection } }).catch(() => undefined);
-    setNewSection('');
+    const ok = await apiFetch('/sections', { method: 'POST', body: { courseId: id, title: newSection } }).then(() => true, fail);
+    if (ok) setNewSection('');
     await load();
   }
 
@@ -130,7 +142,7 @@ function ManageInner({ id }: { id: string }) {
     await apiFetch('/lessons', {
       method: 'POST',
       body: { courseId: id, sectionId, title },
-    }).catch(() => undefined);
+    }).then(() => true, fail);
     await load();
   }
 
@@ -142,17 +154,42 @@ function ManageInner({ id }: { id: string }) {
       body: {
         title: lessonTitle,
         description: lessonDescription || undefined,
+        transcript: lessonTranscript,
         isPreview: lessonPreview,
       },
-    }).catch(() => undefined);
+    }).then(() => true, fail);
     setSavingLesson(false);
     await load();
     await loadLesson(selectedLessonId);
   }
 
+  const [generating, setGenerating] = useState<'summary' | 'quiz' | null>(null);
+  async function generate(kind: 'summary' | 'quiz') {
+    if (!selectedLessonId) return;
+    setGenerating(kind);
+    await apiFetch(`/lessons/${selectedLessonId}/ai/${kind}`, { method: 'POST', body: kind === 'quiz' ? { count: 5 } : {} }).then(
+      () => true,
+      fail,
+    );
+    setGenerating(null);
+    await loadLesson(selectedLessonId);
+  }
+
+  const [writingDescription, setWritingDescription] = useState(false);
+  async function writeDescription() {
+    if (description.trim() && !confirm('Replace the current description with an AI draft?')) return;
+    setWritingDescription(true);
+    const topics = outcomes.split('\n').map((s) => s.trim()).filter(Boolean);
+    await apiFetch<{ description: string }>('/ai/course-description', {
+      method: 'POST',
+      body: { title, topics },
+    }).then((r) => setDescription(r.description.trim()), fail);
+    setWritingDescription(false);
+  }
+
   async function deleteLesson(lessonId: string) {
     if (!confirm('Delete this lesson and its video?')) return;
-    await apiFetch(`/lessons/${lessonId}`, { method: 'DELETE' }).catch(() => undefined);
+    await apiFetch(`/lessons/${lessonId}`, { method: 'DELETE' }).then(() => true, fail);
     if (selectedLessonId === lessonId) setSelectedLessonId(null);
     await load();
   }
@@ -172,7 +209,7 @@ function ManageInner({ id }: { id: string }) {
         outcomes: outcomes.split('\n').map((s) => s.trim()).filter(Boolean),
         requirements: requirements.split('\n').map((s) => s.trim()).filter(Boolean),
       },
-    }).catch(() => undefined);
+    }).then(() => true, fail);
     setSavingCourse(false);
     await load();
   }
@@ -190,6 +227,14 @@ function ManageInner({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
+      {actionError ? (
+        <div role="alert" className="flex items-center gap-3 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          <span className="flex-1">{actionError}</span>
+          <button type="button" onClick={() => setActionError(null)} className="font-semibold hover:underline">
+            Dismiss
+          </button>
+        </div>
+      ) : null}
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -201,7 +246,7 @@ function ManageInner({ id }: { id: string }) {
             <span className="text-slate-900 dark:text-white">{course.title}</span>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{course.title}</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{course.title}</h1>
             <Badge variant={course.status === 'published' ? 'success' : 'warning'}>{course.status}</Badge>
           </div>
           <p className="mt-1 text-sm text-slate-500">
@@ -254,8 +299,30 @@ function ManageInner({ id }: { id: string }) {
               <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
             </div>
             <div>
-              <Label>Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} />
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <Label htmlFor="course-description" className="mb-0">
+                  Description
+                </Label>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  type="button"
+                  disabled={writingDescription || title.trim().length < 3}
+                  onClick={() => void writeDescription()}
+                >
+                  <Sparkles size={14} />
+                  {writingDescription ? 'Writing…' : 'Write with AI'}
+                </Button>
+              </div>
+              <Textarea
+                id="course-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                The AI draft uses the title and the outcomes below. Edit it, then save.
+              </p>
             </div>
             <div>
               <ThumbnailUpload value={thumbnailUrl} onChange={setThumbnailUrl} />
@@ -374,6 +441,20 @@ function ManageInner({ id }: { id: string }) {
                         rows={3}
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="lesson-transcript">Transcript</Label>
+                      <Textarea
+                        id="lesson-transcript"
+                        value={lessonTranscript}
+                        onChange={(e) => setLessonTranscript(e.target.value)}
+                        rows={6}
+                        maxLength={50000}
+                        placeholder="Paste what's said in the video. The AI tutor, summary and quiz use it to answer about this lesson."
+                      />
+                      <p className="mt-1 text-xs text-slate-500">
+                        {lessonTranscript.length.toLocaleString()} / 50,000 characters
+                      </p>
+                    </div>
                     <label className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
@@ -394,6 +475,37 @@ function ManageInner({ id }: { id: string }) {
                         onClick={() => void deleteLesson(selectedLessonId)}
                       >
                         <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                <Card>
+                  <CardBody className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={16} className="text-signal dark:text-signal-bright" />
+                      <h3 className="font-display font-semibold text-slate-900 dark:text-white">AI study aids</h3>
+                    </div>
+                    <p className="text-sm text-slate-500">
+                      Learners see these under Summary and Quiz in the lesson. They&apos;re written from the lesson&apos;s
+                      transcript, or only its title if there is none, so check them before publishing.
+                    </p>
+                    {lessonDetail.aiSummary ? (
+                      <p className="whitespace-pre-line rounded-2xl bg-slate-50 p-3 text-sm text-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                        {lessonDetail.aiSummary}
+                      </p>
+                    ) : null}
+                    <p className="text-sm text-slate-500">
+                      {lessonDetail.quiz?.questions?.length
+                        ? `Quiz: ${lessonDetail.quiz.questions.length} questions`
+                        : 'No quiz yet.'}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" disabled={generating !== null} onClick={() => void generate('summary')}>
+                        {generating === 'summary' ? 'Writing…' : lessonDetail.aiSummary ? 'Rewrite summary' : 'Generate summary'}
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={generating !== null} onClick={() => void generate('quiz')}>
+                        {generating === 'quiz' ? 'Writing…' : lessonDetail.quiz ? 'Regenerate quiz' : 'Generate quiz'}
                       </Button>
                     </div>
                   </CardBody>

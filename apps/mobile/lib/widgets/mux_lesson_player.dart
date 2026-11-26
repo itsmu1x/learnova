@@ -194,7 +194,7 @@ class _MuxLessonPlayerState extends State<MuxLessonPlayer> {
                     allowScrubbing: true,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     colors: const VideoProgressColors(
-                      playedColor: AppTheme.indigo,
+                      playedColor: AppTheme.marigold,
                       bufferedColor: Colors.white24,
                       backgroundColor: Colors.white12,
                     ),
@@ -262,7 +262,7 @@ class _Poster extends StatelessWidget {
                   onTap: onPlay,
                   child: const Padding(
                     padding: EdgeInsets.all(16),
-                    child: Icon(Icons.play_arrow_rounded, size: 40, color: AppTheme.indigo),
+                    child: Icon(Icons.play_arrow_rounded, size: 40, color: AppTheme.cobalt),
                   ),
                 ),
               ),

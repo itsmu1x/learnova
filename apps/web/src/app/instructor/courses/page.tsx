@@ -39,7 +39,7 @@ function CoursesList() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">My courses</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">My courses</h1>
           <p className="mt-1 text-slate-500">Edit curriculum, upload videos, and publish.</p>
         </div>
         <Link href="/instructor/courses/new">
@@ -75,7 +75,7 @@ function CoursesList() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((course) => (
             <Card key={course.id} className="overflow-hidden transition-shadow hover:shadow-md">
-              <div className="aspect-video bg-gradient-to-br from-indigo-500 to-violet-600">
+              <div className="aspect-video bg-[radial-gradient(120%_100%_at_90%_10%,#2756D8_0%,#0F1A3A_65%)]">
                 {course.thumbnailUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={course.thumbnailUrl} alt="" className="h-full w-full object-cover" />

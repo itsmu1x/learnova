@@ -33,10 +33,10 @@ export default function LoginPage() {
 
   return (
     <AuthShell mode="login">
-      <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-[#0B0D12] dark:text-white sm:text-3xl">
+      <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-paper-ink dark:text-white sm:text-3xl">
         Welcome back
       </h1>
-      <p className="mt-2 text-sm leading-relaxed text-[#5C6578] dark:text-slate-400">
+      <p className="mt-2 text-sm leading-relaxed text-paper-mute dark:text-slate-400">
         Log in to continue learning.
       </p>
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
         <a href={`${API_URL}/auth/oauth/google`}>
           <Button
             variant="outline"
-            className="w-full rounded-none border-[#D8DCE6] bg-transparent hover:border-[#0057FF] dark:border-slate-600"
+            className="w-full"
           >
             Google
           </Button>
@@ -52,22 +52,22 @@ export default function LoginPage() {
         <a href={`${API_URL}/auth/oauth/github`}>
           <Button
             variant="outline"
-            className="w-full gap-2 rounded-none border-[#D8DCE6] bg-transparent hover:border-[#0057FF] dark:border-slate-600"
+            className="w-full gap-2"
           >
             <Github size={16} /> GitHub
           </Button>
         </a>
       </div>
 
-      <div className="my-7 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5C6578]">
-        <span className="h-px flex-1 bg-[#D8DCE6] dark:bg-slate-700" />
+      <div className="my-7 flex items-center gap-3 text-[11px] font-semibold text-paper-mute">
+        <span className="h-px flex-1 bg-paper-line dark:bg-slate-700" />
         or
-        <span className="h-px flex-1 bg-[#D8DCE6] dark:bg-slate-700" />
+        <span className="h-px flex-1 bg-paper-line dark:bg-slate-700" />
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block space-y-1.5">
-          <span className="font-display text-xs font-semibold uppercase tracking-wider text-[#5C6578]">Email</span>
+          <span className="text-sm font-medium text-paper-ink dark:text-slate-200">Email</span>
           <Input
             type="email"
             placeholder="you@example.com"
@@ -75,11 +75,16 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="rounded-none border-[#D8DCE6] bg-white focus-visible:ring-[#0057FF] dark:border-slate-600 dark:bg-slate-950"
+           
           />
         </label>
         <label className="block space-y-1.5">
-          <span className="font-display text-xs font-semibold uppercase tracking-wider text-[#5C6578]">Password</span>
+          <span className="flex items-center justify-between text-sm font-medium text-paper-ink dark:text-slate-200">
+            Password
+            <Link href="/forgot-password" className="font-semibold text-signal hover:underline dark:text-signal-bright">
+              Forgot password?
+            </Link>
+          </span>
           <Input
             type="password"
             placeholder="••••••••"
@@ -87,22 +92,22 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="rounded-none border-[#D8DCE6] bg-white focus-visible:ring-[#0057FF] dark:border-slate-600 dark:bg-slate-950"
+           
           />
         </label>
         {error ? (
-          <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
             {error}
           </p>
         ) : null}
-        <Button type="submit" className="w-full rounded-none" size="lg" disabled={loading}>
+        <Button type="submit" className="w-full" size="lg" disabled={loading}>
           {loading ? 'Signing in…' : 'Log in'}
         </Button>
       </form>
 
-      <p className="mt-8 text-sm text-[#5C6578] dark:text-slate-400">
+      <p className="mt-8 text-sm text-paper-mute dark:text-slate-400">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="font-semibold text-[#0057FF] hover:underline dark:text-[#4D8BFF]">
+        <Link href="/register" className="font-semibold text-signal hover:underline dark:text-signal-bright">
           Sign up
         </Link>
       </p>

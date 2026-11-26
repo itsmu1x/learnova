@@ -20,43 +20,44 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
 
   return (
     <>
-      <section className="border-b border-slate-200 bg-slate-900 text-white dark:border-slate-800">
-        <Container className="grid gap-8 py-12 lg:grid-cols-3">
+      <section className="px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[88rem] rounded-4xl bg-paper-ink text-white">
+        <Container className="grid gap-10 py-12 md:py-16 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2">
-              <Badge variant="indigo" className="capitalize">{course.level}</Badge>
-              {course.category ? <Badge>{course.category.name}</Badge> : null}
-              {course.isPro ? <Badge variant="warning">Pro</Badge> : null}
+              <Badge className="bg-white/10 capitalize text-white dark:bg-white/10 dark:text-white">{course.level}</Badge>
+              {course.category ? <Badge className="bg-white/10 text-white dark:bg-white/10 dark:text-white">{course.category.name}</Badge> : null}
+              {course.isPro ? <Badge variant="pro">Pro</Badge> : null}
             </div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">{course.title}</h1>
-            {course.subtitle ? <p className="mt-3 text-lg text-slate-300">{course.subtitle}</p> : null}
-            <div className="mt-5 flex flex-wrap items-center gap-5 text-sm text-slate-300">
-              <span className="flex items-center gap-1.5 text-amber-400">
-                <Star size={16} className="fill-amber-400" /> {course.averageRating.toFixed(1)} ({course.ratingCount})
+            <h1 className="mt-5 text-balance font-display text-4xl font-semibold leading-[1.02] tracking-[-0.03em] md:text-6xl">{course.title}</h1>
+            {course.subtitle ? <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/65 md:text-xl">{course.subtitle}</p> : null}
+            <div className="mt-7 flex flex-wrap items-center gap-5 text-sm text-white/70">
+              <span className="flex items-center gap-1.5 font-semibold text-white">
+                <Star size={16} className="fill-marigold text-marigold" /> {course.averageRating.toFixed(1)} ({course.ratingCount})
               </span>
               <span className="flex items-center gap-1.5"><Users size={16} /> {course.enrollmentCount} students</span>
               <span className="flex items-center gap-1.5"><PlayCircle size={16} /> {totalLessons} lessons</span>
               <span className="flex items-center gap-1.5"><Clock size={16} /> {formatDuration(course.totalDurationSeconds)}</span>
             </div>
             {course.instructor ? (
-              <p className="mt-4 text-sm text-slate-400">Created by <span className="font-medium text-white">{course.instructor.name}</span></p>
+              <p className="mt-5 text-sm text-white/55">Taught by <span className="font-medium text-white">{course.instructor.name}</span></p>
             ) : null}
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="text-slate-900 dark:text-white">
+            <Card className="overflow-hidden p-2 text-slate-900 dark:text-white">
               {course.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={course.thumbnailUrl}
                   alt={course.title}
-                  className="aspect-video w-full rounded-t-2xl object-cover"
+                  className="aspect-video w-full rounded-2xl object-cover"
                 />
               ) : (
-                <div className="aspect-video rounded-t-2xl bg-gradient-to-br from-indigo-500 to-violet-600" />
+                <div className="aspect-video rounded-2xl bg-[radial-gradient(120%_100%_at_90%_10%,#2756D8_0%,#0F1A3A_65%)]" />
               )}
-              <CardBody className="space-y-4">
-                <div className="text-3xl font-bold">
+              <CardBody className="space-y-5 p-4">
+                <div className="font-display text-3xl font-semibold tracking-tight">
                   {course.isPro
                     ? 'Included with Pro'
                     : course.priceCents === 0
@@ -65,25 +66,26 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                 </div>
                 <EnrollButton courseId={course.id} priceCents={course.priceCents} isPro={course.isPro} />
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-                  <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Lifetime access</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> Certificate of completion</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> AI tutor included</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-signal dark:text-signal-bright" /> Lifetime access</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-signal dark:text-signal-bright" /> Certificate of completion</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 size={16} className="text-signal dark:text-signal-bright" /> AI tutor included</li>
                 </ul>
               </CardBody>
             </Card>
           </div>
         </Container>
+        </div>
       </section>
 
-      <Container className="grid gap-10 py-12 lg:grid-cols-3">
+      <Container className="grid gap-12 py-14 lg:grid-cols-3">
         <div className="space-y-10 lg:col-span-2">
           {course.outcomes.length > 0 ? (
             <section>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">What you&apos;ll learn</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">What you&apos;ll learn</h2>
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                 {course.outcomes.map((o) => (
                   <li key={o} className="flex items-start gap-2 text-slate-600 dark:text-slate-300">
-                    <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-500" /> {o}
+                    <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-signal dark:text-signal-bright" /> {o}
                   </li>
                 ))}
               </ul>
@@ -91,16 +93,18 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
           ) : null}
 
           <section>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Course content</h2>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Course content</h2>
             <p className="mt-1 text-sm text-slate-500">
               {course.curriculum.length} sections · {totalLessons} lessons
             </p>
-            <div className="mt-4 space-y-3">
-              {course.curriculum.map((section) => (
-                <Card key={section.id}>
-                  <CardBody>
-                    <h3 className="font-semibold text-slate-900 dark:text-white">{section.title}</h3>
-                    <ul className="mt-3 space-y-2">
+            <div className="mt-5 divide-y divide-slate-200 overflow-hidden rounded-3xl border border-slate-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
+              {course.curriculum.map((section, i) => (
+                <div key={section.id} className="p-6">
+                    <h3 className="font-display text-lg font-semibold text-slate-900 dark:text-white">
+                      <span className="mr-2 text-slate-400">{i + 1}.</span>
+                      {section.title}
+                    </h3>
+                    <ul className="mt-4 space-y-3">
                       {section.lessons.map((lesson) => (
                         <li key={lesson.id} className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
                           <span className="flex items-center gap-2">
@@ -111,15 +115,14 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
                         </li>
                       ))}
                     </ul>
-                  </CardBody>
-                </Card>
+                </div>
               ))}
             </div>
           </section>
 
           {course.description ? (
             <section>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Description</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Description</h2>
               <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-600 dark:text-slate-300">
                 {course.description}
               </p>

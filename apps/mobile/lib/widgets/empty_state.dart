@@ -27,21 +27,16 @@ class EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary.withOpacity(0.15),
-                    theme.colorScheme.secondary.withOpacity(0.1),
-                  ],
-                ),
+                color: theme.colorScheme.primaryContainer,
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 40, color: theme.colorScheme.primary),
             ),
             const SizedBox(height: 20),
-            Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            Text(title, style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
             if (subtitle != null) ...[
               const SizedBox(height: 8),
-              Text(subtitle!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor), textAlign: TextAlign.center),
+              Text(subtitle!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
             ],
             if (action != null) ...[const SizedBox(height: 20), action!],
           ],

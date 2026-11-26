@@ -28,15 +28,15 @@ export function CourseShelf({
     <div className="group/shelf relative">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <h2 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">{title}</h2>
-          {subtitle ? <p className="mt-1 text-sm text-[#5C6578] dark:text-slate-400">{subtitle}</p> : null}
+          <h2 className="font-display text-2xl font-semibold tracking-tight md:text-[2rem]">{title}</h2>
+          {subtitle ? <p className="mt-1 text-paper-mute">{subtitle}</p> : null}
         </div>
         <div className="hidden items-center gap-2 sm:flex">
           <button
             type="button"
             aria-label="Scroll left"
             onClick={() => scroll(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D8DCE6] bg-white text-[#0B0D12] transition hover:border-[#0057FF] hover:text-[#0057FF] dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-paper-line text-paper-ink transition-colors hover:bg-paper-ink hover:text-white dark:text-white dark:hover:bg-white dark:hover:text-paper-ink"
           >
             <ChevronLeft size={18} />
           </button>
@@ -44,7 +44,7 @@ export function CourseShelf({
             type="button"
             aria-label="Scroll right"
             onClick={() => scroll(1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#D8DCE6] bg-white text-[#0B0D12] transition hover:border-[#0057FF] hover:text-[#0057FF] dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-paper-line text-paper-ink transition-colors hover:bg-paper-ink hover:text-white dark:text-white dark:hover:bg-white dark:hover:text-paper-ink"
           >
             <ChevronRight size={18} />
           </button>
@@ -53,10 +53,10 @@ export function CourseShelf({
 
       <div
         ref={scroller}
-        className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0"
       >
         {courses.map((course) => (
-          <div key={course.id} className="w-[260px] shrink-0 snap-start sm:w-[280px]">
+          <div key={course.id} className="w-[272px] shrink-0 snap-start sm:w-[296px]">
             <CourseCard course={course} />
           </div>
         ))}

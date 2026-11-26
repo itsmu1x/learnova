@@ -8,6 +8,7 @@ import { enrollmentsService } from '../enrollments/enrollments.service.js';
 import {
   createCourseCheckout,
   createSubscriptionCheckout,
+  getStripe,
   isStripeConfigured,
 } from '../../services/stripe.service.js';
 import { recordAudit } from '../audit/audit.service.js';
@@ -153,11 +154,31 @@ export const paymentsService = {
   },
 
   async cancelSubscription(userId: string) {
+    const [sub] = await db()
+      .select()
+      .from(schema.subscriptions)
+      .where(eq(schema.subscriptions.userId, userId))
+      .limit(1);
+    if (!sub) throw new NotFoundError('No subscription to cancel');
+
+    if (sub.providerSubscriptionId && isStripeConfigured()) {
+      // Stop renewal in Stripe; access stays until the paid period ends, and the
+      // `customer.subscription.deleted` webhook flips status to canceled then.
+      await getStripe().subscriptions.update(sub.providerSubscriptionId, { cancel_at_period_end: true });
+      await db()
+        .update(schema.subscriptions)
+        .set({ cancelAtPeriodEnd: sub.currentPeriodEnd ?? new Date(), updatedAt: new Date() })
+        .where(eq(schema.subscriptions.id, sub.id));
+      await recordAudit({ actorId: userId, action: 'subscription.cancel', entityType: 'subscription', entityId: sub.id });
+      return { canceled: true, endsAt: sub.currentPeriodEnd };
+    }
+
+    // Dev mode (no Stripe): nothing is billed, so end access right away.
     await db()
       .update(schema.subscriptions)
       .set({ status: 'canceled', cancelAtPeriodEnd: new Date(), updatedAt: new Date() })
-      .where(eq(schema.subscriptions.userId, userId));
-    return { canceled: true };
+      .where(eq(schema.subscriptions.id, sub.id));
+    return { canceled: true, endsAt: null };
   },
 
   async mySubscription(userId: string) {

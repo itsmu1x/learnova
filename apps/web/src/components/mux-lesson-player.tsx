@@ -105,7 +105,7 @@ export function MuxLessonPlayer({ lessonId, title, posterUrl }: MuxLessonPlayerP
         poster={posterUrl ?? undefined}
         streamType="on-demand"
         metadata={{ video_title: title }}
-        accentColor="#4f46e5"
+        accentColor="#2756D8"
         className="h-full w-full"
         style={{ width: '100%', height: '100%', aspectRatio: '16 / 9' }}
       />

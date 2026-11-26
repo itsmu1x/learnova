@@ -35,7 +35,7 @@ export function Protected({
   if (permission && !can(permission)) {
     return (
       <Container className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Access denied</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Access denied</h1>
         <p className="mt-2 text-slate-500">You don&apos;t have permission to view this page.</p>
       </Container>
     );

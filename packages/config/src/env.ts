@@ -66,10 +66,12 @@ const envSchema = z.object({
   MUX_SIGNING_KEY_ID: z.string().optional().default(''),
   MUX_SIGNING_KEY_PRIVATE_KEY: z.string().optional().default(''),
 
-  AI_PROVIDER: z.enum(['openai', 'gemini', 'claude', 'mock']).default('mock'),
+  AI_PROVIDER: z.enum(['openai', 'gemini', 'claude', 'groq', 'mock']).default('mock'),
   OPENAI_API_KEY: z.string().optional().default(''),
   GEMINI_API_KEY: z.string().optional().default(''),
   ANTHROPIC_API_KEY: z.string().optional().default(''),
+  GROQ_API_KEY: z.string().optional().default(''),
+  GROQ_MODEL: z.string().optional().default('openai/gpt-oss-20b'),
 });
 
 export type Env = z.infer<typeof envSchema>;

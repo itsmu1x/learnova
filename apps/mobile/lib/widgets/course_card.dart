@@ -4,211 +4,211 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 
+/// Course thumbnail, or a navy placeholder with the title when there is no image.
+class CourseThumb extends StatelessWidget {
+  const CourseThumb({super.key, required this.course, this.titleSize = 14});
+
+  final Course course;
+  final double titleSize;
+
+  @override
+  Widget build(BuildContext context) {
+    if (course.thumbnailUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: course.thumbnailUrl!,
+        fit: BoxFit.cover,
+        errorWidget: (_, __, ___) => _placeholder(),
+      );
+    }
+    return _placeholder();
+  }
+
+  Widget _placeholder() => Container(
+        decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
+        alignment: Alignment.bottomLeft,
+        padding: const EdgeInsets.all(12),
+        child: Text(
+          course.title,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: AppTheme.display(
+            TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: titleSize, height: 1.15),
+          ),
+        ),
+      );
+}
+
+class ProBadge extends StatelessWidget {
+  const ProBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+        decoration: BoxDecoration(color: AppTheme.marigold, borderRadius: BorderRadius.circular(999)),
+        child: const Text(
+          'Pro',
+          style: TextStyle(color: AppTheme.navy, fontSize: 11, fontWeight: FontWeight.w800),
+        ),
+      );
+}
+
+/// Grid / shelf card: inset rounded thumbnail, level + category, title, rating, price.
 class CourseCard extends StatelessWidget {
-  const CourseCard({super.key, required this.course, required this.onTap, this.compact = false});
+  const CourseCard({super.key, required this.course, required this.onTap});
 
   final Course course;
   final VoidCallback onTap;
-  final bool compact;
+
+  static String levelLabel(String level) =>
+      level.isEmpty ? level : '${level[0].toUpperCase()}${level.substring(1)}';
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Card(
       clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  course.thumbnailUrl != null
-                      ? CachedNetworkImage(imageUrl: course.thumbnailUrl!, fit: BoxFit.cover)
-                      : Container(
-                          decoration: const BoxDecoration(gradient: AppTheme.cardGradient),
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            course.title,
-                            textAlign: TextAlign.center,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.55),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        course.level,
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                  if (course.isPro)
-                    const Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Chip(
-                        label: Text('PRO', style: TextStyle(fontSize: 10)),
-                        backgroundColor: Color(0xFFF59E0B),
-                        labelStyle: TextStyle(color: Colors.white),
-                        padding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(compact ? 10 : 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    course.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  if (!compact) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      course.instructor?.name ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  Row(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 10,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      const Icon(Icons.star_rounded, size: 15, color: AppTheme.warning),
-                      const SizedBox(width: 2),
+                      CourseThumb(course: course, titleSize: 13),
+                      if (course.isPro) const Positioned(top: 8, left: 8, child: ProBadge()),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        course.averageRating.toStringAsFixed(1),
-                        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                        [levelLabel(course.level), if (course.categoryName != null) course.categoryName!].join(', '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        course.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.display(theme.textTheme.titleSmall?.copyWith(height: 1.2)),
                       ),
                       const Spacer(),
-                      Text(
-                        course.priceLabel,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: course.isFree ? AppTheme.success : null,
-                        ),
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, size: 16, color: AppTheme.marigold),
+                          const SizedBox(width: 2),
+                          Text(
+                            course.averageRating.toStringAsFixed(1),
+                            style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const Spacer(),
+                          Text(
+                            course.isPro ? 'Pro' : course.priceLabel,
+                            style: AppTheme.display(theme.textTheme.titleSmall),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Horizontal card for "continue learning" carousel.
-class ContinueCourseCard extends StatelessWidget {
-  const ContinueCourseCard({
-    super.key,
-    required this.enrollment,
-    required this.onTap,
-    this.height = 188,
-  });
+/// The big "pick up where you left off" card on Home.
+class ContinueHeroCard extends StatelessWidget {
+  const ContinueHeroCard({super.key, required this.enrollment, required this.onTap});
 
   final Enrollment enrollment;
   final VoidCallback onTap;
-  final double height;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final course = enrollment.course;
-
-    return SizedBox(
-      width: 260,
-      height: height,
-      child: Material(
-        color: theme.colorScheme.surface,
-        elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
+    return Material(
+      color: AppTheme.navy,
+      borderRadius: BorderRadius.circular(28),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(
-                height: 96,
-                width: double.infinity,
-                child: course.thumbnailUrl != null
-                    ? CachedNetworkImage(imageUrl: course.thumbnailUrl!, fit: BoxFit.cover)
-                    : Container(
-                        decoration: const BoxDecoration(gradient: AppTheme.heroGradient),
-                        padding: const EdgeInsets.all(12),
-                        alignment: Alignment.bottomLeft,
-                        child: Text(
-                          course.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              AspectRatio(
+                aspectRatio: 16 / 8,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Text(
-                        course.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const Spacer(),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: enrollment.progressPercent / 100,
-                          minHeight: 6,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${enrollment.progressPercent}% complete · Resume',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
+                      CourseThumb(course: course, titleSize: 18),
+                      Center(
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                          child: const Icon(Icons.play_arrow_rounded, color: AppTheme.navy, size: 34),
                         ),
                       ),
                     ],
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 14, 8, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Continue learning',
+                      style: theme.textTheme.labelLarge?.copyWith(color: AppTheme.marigold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      course.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.display(theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
+                    ),
+                    const SizedBox(height: 14),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: enrollment.progressPercent / 100,
+                        minHeight: 6,
+                        color: AppTheme.marigold,
+                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${enrollment.progressPercent}% complete',
+                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                    ),
+                  ],
                 ),
               ),
             ],

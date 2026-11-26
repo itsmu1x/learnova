@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
+import '../core/config.dart';
 import '../state/auth_state.dart';
+import '../widgets/brand_logo.dart';
 import '../widgets/page_insets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -61,16 +65,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   top: 0,
                   child: Column(
                     children: [
+                      const BrandLogo(height: 44),
+                      const SizedBox(height: 14),
                       Text(
                         _isRegister ? 'Create your account' : 'Welcome back',
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
                       ),
                       Text(
-                        _isRegister ? 'Start your learning journey' : 'Welcome back, learner',
+                        _isRegister ? 'Your first lesson is a few minutes away.' : 'Log in to pick up where you left off.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
                       ),
@@ -102,6 +105,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           obscureText: true,
                           decoration: const InputDecoration(labelText: 'Password'),
                         ),
+                        if (!_isRegister)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => launchUrl(
+                                Uri.parse('${AppConfig.webUrl}/forgot-password'),
+                                mode: LaunchMode.inAppBrowserView,
+                              ),
+                              child: const Text('Forgot password?'),
+                            ),
+                          ),
                         if (_error != null) ...[
                           const SizedBox(height: 12),
                           Text(_error!, style: TextStyle(color: theme.colorScheme.error)),

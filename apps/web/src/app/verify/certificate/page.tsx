@@ -15,7 +15,7 @@ export default function VerifyLandingPage() {
           <div className="mb-4 flex justify-center">
             <Logo variant="mark" height={48} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Verify a certificate</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Verify a certificate</h1>
           <p className="mt-1 text-sm text-slate-500">Enter a certificate ID to check its authenticity.</p>
           <form
             className="mt-6 flex gap-2"

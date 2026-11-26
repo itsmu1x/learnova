@@ -99,9 +99,9 @@ function UsersPanel() {
               key={f}
               type="button"
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 font-display text-xs font-semibold uppercase tracking-wider transition ${
+              className={`px-3 py-1.5 font-display text-xs font-semibold transition ${
                 filter === f
-                  ? 'bg-[#0B0D12] text-white dark:bg-white dark:text-[#0B0D12]'
+                  ? 'bg-paper-ink text-white dark:bg-white dark:text-paper-ink'
                   : 'border border-slate-200 text-slate-500 hover:border-slate-400 dark:border-slate-700'
               }`}
             >
@@ -114,7 +114,7 @@ function UsersPanel() {
       <div className="relative max-w-md">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <Input
-          className="rounded-none pl-9"
+          className="pl-9"
           placeholder="Search name or email…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -153,7 +153,7 @@ function UsersPanel() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="rounded-none"
+                     
                       disabled={!can('MANAGE_USERS') && !can('VIEW_USERS')}
                       onClick={() => setSelected(u)}
                     >

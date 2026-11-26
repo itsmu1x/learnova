@@ -111,7 +111,7 @@ export function UserManageDrawer({
       <aside className="flex h-full w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-950">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
           <div>
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.16em] text-[#0057FF] dark:text-[#4D8BFF]">
+            <p className="font-display text-sm font-semibold text-paper-ink dark:text-white">
               Manage user
             </p>
             <h2 className="mt-1 font-display text-xl font-semibold text-slate-900 dark:text-white">{user.name}</h2>
@@ -139,7 +139,7 @@ export function UserManageDrawer({
           ) : null}
 
           {error ? (
-            <div className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
               {error}
             </div>
           ) : null}
@@ -157,7 +157,7 @@ export function UserManageDrawer({
                     <label
                       className={`flex cursor-pointer items-center justify-between gap-3 border px-3 py-2.5 transition ${
                         checked
-                          ? 'border-[#0057FF] bg-[#E8F0FF]/70 dark:border-[#4D8BFF] dark:bg-[#0f1a33]'
+                          ? 'border-signal bg-signal-soft/70 dark:border-signal-bright dark:bg-slate-900'
                           : 'border-slate-200 hover:border-slate-300 dark:border-slate-800'
                       } ${outranked || !canManageUsers ? 'cursor-not-allowed opacity-60' : ''}`}
                     >
@@ -169,7 +169,7 @@ export function UserManageDrawer({
                         <PowerBadge power={role.power} compact />
                         <input
                           type="checkbox"
-                          className="h-4 w-4 accent-[#0057FF]"
+                          className="h-4 w-4 accent-signal"
                           checked={checked}
                           disabled={outranked || !canManageUsers || busy}
                           onChange={() => toggleRole(role.id)}
@@ -181,7 +181,7 @@ export function UserManageDrawer({
               })}
             </ul>
             {canManageUsers && !outranked ? (
-              <Button className="mt-3 w-full rounded-none" disabled={busy} onClick={() => void saveRoles()}>
+              <Button className="mt-3 w-full" disabled={busy} onClick={() => void saveRoles()}>
                 {busy ? 'Saving…' : 'Save roles'}
               </Button>
             ) : null}
@@ -193,7 +193,7 @@ export function UserManageDrawer({
               <Button
                 size="sm"
                 variant={user.isBanned ? 'secondary' : 'destructive'}
-                className="rounded-none"
+               
                 disabled={outranked || !canManageUsers || busy}
                 onClick={() => void patchUser({ isBanned: !user.isBanned })}
               >
@@ -202,7 +202,7 @@ export function UserManageDrawer({
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-none"
+               
                 disabled={outranked || !canManageUsers || busy}
                 onClick={() => void patchUser({ isActive: !user.isActive })}
               >
@@ -211,7 +211,7 @@ export function UserManageDrawer({
               <Button
                 size="sm"
                 variant="destructive"
-                className="rounded-none"
+               
                 disabled={outranked || !canManageUsers || busy}
                 onClick={() => void softDelete()}
               >

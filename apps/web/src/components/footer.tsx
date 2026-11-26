@@ -2,66 +2,67 @@ import Link from 'next/link';
 import { Container } from '@learnova/ui';
 import { Logo } from '@/components/logo';
 
+const COLUMNS: { title: string; links: [string, string][] }[] = [
+  {
+    title: 'Learn',
+    links: [
+      ['Courses', '/courses'],
+      ['Search', '/search'],
+      ['Pricing', '/pricing'],
+    ],
+  },
+  {
+    title: 'Account',
+    links: [
+      ['Log in', '/login'],
+      ['Create account', '/register'],
+      ['My learning', '/dashboard'],
+    ],
+  },
+  {
+    title: 'More',
+    links: [
+      ['Verify a certificate', '/verify/certificate'],
+      ['Teach on Learnova', '/register/instructor'],
+    ],
+  },
+];
+
 export function Footer() {
   return (
-    <footer className="border-t border-paper-line bg-paper dark:border-slate-800 dark:bg-paper-ink">
-      <Container className="flex flex-col gap-10 py-14 md:flex-row md:items-start md:justify-between">
+    <footer className="bg-paper-ink text-white">
+      <Container className="grid gap-12 pb-10 pt-16 md:grid-cols-[1.2fr_2fr]">
         <div className="max-w-sm">
-          <div className="flex items-center gap-2.5 text-paper-ink dark:text-white">
+          <div className="flex items-center gap-2.5">
             <Logo variant="mark" height={28} />
-            <span className="font-display text-lg font-semibold tracking-tight">Learnova</span>
+            <span className="font-display text-xl font-semibold tracking-tight">Learnova</span>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-paper-mute">
-            A focused learning platform — courses, AI help, and certificates you can verify.
+          <p className="mt-4 leading-relaxed text-white/60">
+            Video courses with an AI tutor beside every lesson, and certificates anyone can verify.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-x-12 gap-y-8 text-sm">
-          <FooterCol
-            title="Learn"
-            links={[
-              ['Courses', '/courses'],
-              ['Pricing', '/pricing'],
-              ['Search', '/search'],
-            ]}
-          />
-          <FooterCol
-            title="Account"
-            links={[
-              ['Log in', '/login'],
-              ['Register', '/register'],
-              ['Dashboard', '/dashboard'],
-            ]}
-          />
-          <FooterCol
-            title="Trust"
-            links={[
-              ['Verify certificate', '/verify/certificate'],
-              ['Become an instructor', '/register/instructor'],
-            ]}
-          />
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          {COLUMNS.map((col) => (
+            <div key={col.title}>
+              <h4 className="font-display text-sm font-semibold text-marigold">{col.title}</h4>
+              <ul className="mt-4 space-y-2.5 text-[15px] text-white/70">
+                {col.links.map(([label, href]) => (
+                  <li key={href}>
+                    <Link href={href} className="transition-colors hover:text-white">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </Container>
-      <div className="border-t border-paper-line py-5 text-center text-xs text-paper-mute dark:border-slate-800">
-        © {new Date().getFullYear()} Learnova
-      </div>
+      <Container className="flex flex-col gap-2 border-t border-white/10 py-6 text-sm text-white/45 sm:flex-row sm:justify-between">
+        <span>© {new Date().getFullYear()} Learnova</span>
+        <span>Learn it, then prove it.</span>
+      </Container>
     </footer>
-  );
-}
-
-function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
-  return (
-    <div>
-      <h4 className="font-display text-sm font-semibold text-paper-ink dark:text-white">{title}</h4>
-      <ul className="mt-3 space-y-2 text-paper-mute">
-        {links.map(([label, href]) => (
-          <li key={label}>
-            <Link href={href} className="transition-colors hover:text-paper-ink dark:hover:text-white">
-              {label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }

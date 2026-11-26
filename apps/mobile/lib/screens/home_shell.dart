@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'browse_screen.dart';
-import 'certificates_screen.dart';
+import 'explore_screen.dart';
+import 'home_screen.dart';
 import 'my_learning_screen.dart';
 import 'profile_screen.dart';
 
@@ -17,16 +17,16 @@ class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
   static const _destinations = [
-    _NavItem(Icons.explore_outlined, Icons.explore, 'Browse'),
+    _NavItem(Icons.home_outlined, Icons.home_rounded, 'Home'),
+    _NavItem(Icons.explore_outlined, Icons.explore, 'Explore'),
     _NavItem(Icons.play_circle_outline, Icons.play_circle, 'Learning'),
-    _NavItem(Icons.workspace_premium_outlined, Icons.workspace_premium, 'Certificates'),
     _NavItem(Icons.person_outline, Icons.person, 'Profile'),
   ];
 
   final _screens = const [
-    BrowseScreen(),
+    HomeScreen(),
+    ExploreScreen(),
     MyLearningScreen(),
-    CertificatesScreen(),
     ProfileScreen(),
   ];
 
@@ -42,7 +42,7 @@ class _HomeShellState extends State<HomeShell> {
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
           color: scheme.surface,
-          border: Border(top: BorderSide(color: scheme.outlineVariant.withOpacity(0.6))),
+          border: Border(top: BorderSide(color: scheme.outlineVariant)),
         ),
         child: SafeArea(
           top: false,
@@ -89,7 +89,7 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = selected ? scheme.primary : scheme.onSurfaceVariant;
+    final color = selected ? scheme.onSurface : scheme.onSurfaceVariant;
 
     return Material(
       color: Colors.transparent,
@@ -103,17 +103,17 @@ class _NavButton extends StatelessWidget {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 40,
-                height: 40,
+                width: 56,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: selected ? scheme.primaryContainer : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                  color: selected ? scheme.onSurface : Colors.transparent,
+                  borderRadius: BorderRadius.circular(999),
                 ),
                 alignment: Alignment.center,
                 child: Icon(
                   selected ? item.activeIcon : item.icon,
                   size: 22,
-                  color: color,
+                  color: selected ? scheme.surface : color,
                 ),
               ),
               const SizedBox(height: 4),

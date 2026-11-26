@@ -1,21 +1,19 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans, Syne } from 'next/font/google';
+import { Bricolage_Grotesque, Figtree } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/lib/auth-context';
 import { SiteChrome } from '@/components/site-chrome';
 
-const plex = IBM_Plex_Sans({
+const body = Figtree({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-plex',
+  variable: '--font-body',
   display: 'swap',
 });
 
-const syne = Syne({
+const display = Bricolage_Grotesque({
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-  variable: '--font-syne',
+  variable: '--font-display',
   display: 'swap',
 });
 
@@ -44,7 +42,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${plex.variable} ${syne.variable} min-h-screen font-sans antialiased`}>
+      <body className={`${body.variable} ${display.variable} min-h-screen font-sans antialiased`}>
         <ThemeProvider>
           <AuthProvider>
             <SiteChrome>{children}</SiteChrome>

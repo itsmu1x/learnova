@@ -63,16 +63,22 @@ function throwIfFailed<T>(res: Response, json: ApiJson<T> | null): asserts json 
 
 async function rawFetch(path: string, options: RequestOptions = {}): Promise<Response> {
   const { body, noStore = true, headers, skipAuthRefresh: _skip, ...rest } = options;
-  return fetch(`${API_URL}${path}`, {
-    ...rest,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers,
-    },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    ...(noStore ? { cache: 'no-store' } : {}),
-  });
+  try {
+    return await fetch(`${API_URL}${path}`, {
+      ...rest,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      ...(noStore ? { cache: 'no-store' } : {}),
+    });
+  } catch (err) {
+    if ((err as Error).name === 'AbortError') throw err;
+    // Browsers report network/CORS failures as a bare "Failed to fetch".
+    throw new ApiRequestError("Can't reach Learnova right now. Check your connection and try again.", 0, 'NETWORK');
+  }
 }
 
 /**

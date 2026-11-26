@@ -1,10 +1,8 @@
-import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
-import { existsSync } from 'node:fs';
 import { schema, and, eq, desc } from '@learnova/database';
 import { NotFoundError, generateCertificateCode } from '@learnova/shared';
 import { getEnv } from '@learnova/config';
-import { brandAssets } from '../../core/brand-assets.js';
+import { drawCertificatePdf } from './certificate-pdf.js';
 import { db } from '../../core/database.js';
 import { recordAudit } from '../audit/audit.service.js';
 
@@ -86,59 +84,9 @@ export const certificatesService = {
     if (!cert) throw new NotFoundError('Certificate not found');
 
     const verifyUrl = `${getEnv().WEB_URL}/verify/certificate/${cert.code}`;
-    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 140 });
+    const qrDataUrl = await QRCode.toDataURL(verifyUrl, { margin: 0, width: 300, color: { dark: '#0F1A3A' } });
     const qrBuffer = Buffer.from(qrDataUrl.split(',')[1]!, 'base64');
 
-    return new Promise<Buffer>((resolve, reject) => {
-      const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 50 });
-      const chunks: Buffer[] = [];
-      doc.on('data', (c: Buffer) => chunks.push(c));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      const { width, height } = doc.page;
-
-      doc.rect(0, 0, width, height).fill('#f8fafc');
-      doc.lineWidth(6).strokeColor('#4f46e5').rect(24, 24, width - 48, height - 48).stroke();
-      doc.lineWidth(1).strokeColor('#c7d2fe').rect(36, 36, width - 72, height - 72).stroke();
-
-      if (existsSync(brandAssets.logoMark)) {
-        const logoW = 72;
-        doc.image(brandAssets.logoMark, (width - logoW) / 2, 48, { width: logoW });
-      } else {
-        doc.fillColor('#4f46e5').fontSize(28).font('Helvetica-Bold').text('LEARNOVA', 0, 70, { align: 'center' });
-      }
-
-      doc.fillColor('#0f172a').fontSize(34).font('Helvetica-Bold').text('Certificate of Completion', 0, 130, {
-        align: 'center',
-      });
-
-      doc.fillColor('#64748b').fontSize(14).font('Helvetica').text('This is proudly presented to', 0, 195, {
-        align: 'center',
-      });
-      doc.fillColor('#0f172a').fontSize(30).font('Helvetica-Bold').text(cert.recipientName, 0, 220, {
-        align: 'center',
-      });
-
-      doc.fillColor('#64748b').fontSize(14).font('Helvetica').text('for successfully completing', 0, 280, {
-        align: 'center',
-      });
-      doc.fillColor('#1e293b').fontSize(22).font('Helvetica-Bold').text(cert.courseTitle, 0, 305, {
-        align: 'center',
-      });
-
-      doc
-        .fillColor('#64748b')
-        .fontSize(12)
-        .font('Helvetica')
-        .text(`Instructor: ${cert.instructorName}`, 0, 360, { align: 'center' })
-        .text(`Issued: ${new Date(cert.issuedAt).toLocaleDateString()}`, 0, 378, { align: 'center' })
-        .text(`Certificate ID: ${cert.code}`, 0, 396, { align: 'center' });
-
-      doc.image(qrBuffer, width - 150, height - 160, { width: 100 });
-      doc.fillColor('#94a3b8').fontSize(9).text('Scan to verify', width - 150, height - 56, { width: 100, align: 'center' });
-
-      doc.end();
-    });
+    return drawCertificatePdf(cert, qrBuffer);
   },
 };
