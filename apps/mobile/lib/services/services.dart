@@ -26,6 +26,11 @@ class CourseService {
     return Course.fromJson(data as Map<String, dynamic>);
   }
 
+  Future<InstructorProfile> instructor(String id) async {
+    final data = await _api.get('/instructors/$id');
+    return InstructorProfile.fromJson(data as Map<String, dynamic>);
+  }
+
   Future<List<Category>> categories() async {
     final data = await _api.get('/categories');
     return (data as List).map((c) => Category.fromJson(c as Map<String, dynamic>)).toList();

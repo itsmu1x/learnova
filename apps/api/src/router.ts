@@ -13,6 +13,7 @@ import { reviewsRouter } from './modules/reviews/reviews.routes.js';
 import { certificatesRouter } from './modules/certificates/certificates.routes.js';
 import { paymentsRouter } from './modules/payments/payments.routes.js';
 import { searchRouter } from './modules/search/search.routes.js';
+import { instructorsRouter } from './modules/instructors/instructors.routes.js';
 import { aiRouter } from './modules/ai/ai.routes.js';
 import { uploadsRouter } from './modules/uploads/uploads.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
@@ -49,6 +50,7 @@ export function buildApiRouter(): Router {
   router.use('/audit', auditRouter);
   router.use('/analytics', analyticsRouter);
   router.use('/instructor-applications', instructorApplicationsRouter);
+  router.use('/instructors', instructorsRouter);
 
   return router;
 }

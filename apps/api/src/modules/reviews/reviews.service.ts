@@ -36,7 +36,8 @@ export const reviewsService = {
       .values({ userId, courseId, rating: input.rating, title: input.title, body: input.body })
       .onConflictDoUpdate({
         target: [schema.reviews.userId, schema.reviews.courseId],
-        set: { rating: input.rating, title: input.title, body: input.body, updatedAt: new Date() },
+        // Re-reviewing after a delete brings the review back (deletion is a soft delete on the same row).
+        set: { rating: input.rating, title: input.title ?? null, body: input.body ?? null, deletedAt: null, updatedAt: new Date() },
       })
       .returning();
     await recomputeCourseRating(courseId);
@@ -61,7 +62,34 @@ export const reviewsService = {
       db()
         .select({ total: sql<number>`count(*)::int` })
         .from(schema.reviews)
-        .where(and(eq(schema.reviews.courseId, courseId), eq(schema.reviews.isHidden, false))),
+        .where(
+          and(eq(schema.reviews.courseId, courseId), eq(schema.reviews.isHidden, false), isNull(schema.reviews.deletedAt)),
+        ),
+    ]);
+    return { items, total };
+  },
+
+  /** Admin moderation queue: every review (hidden ones too), newest first. */
+  async listAll(params: { limit: number; offset: number; hidden?: boolean }) {
+    const where = and(
+      isNull(schema.reviews.deletedAt),
+      params.hidden === undefined ? undefined : eq(schema.reviews.isHidden, params.hidden),
+    );
+    const [items, [{ total } = { total: 0 }]] = await Promise.all([
+      db()
+        .select({
+          review: schema.reviews,
+          user: { id: schema.users.id, name: schema.users.name, email: schema.users.email },
+          course: { id: schema.courses.id, title: schema.courses.title, slug: schema.courses.slug },
+        })
+        .from(schema.reviews)
+        .innerJoin(schema.users, eq(schema.reviews.userId, schema.users.id))
+        .innerJoin(schema.courses, eq(schema.reviews.courseId, schema.courses.id))
+        .where(where)
+        .orderBy(desc(schema.reviews.createdAt))
+        .limit(params.limit)
+        .offset(params.offset),
+      db().select({ total: sql<number>`count(*)::int` }).from(schema.reviews).where(where),
     ]);
     return { items, total };
   },

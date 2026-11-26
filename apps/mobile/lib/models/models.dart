@@ -327,3 +327,49 @@ class Purchase {
     );
   }
 }
+
+class InstructorProfile {
+  InstructorProfile({
+    required this.id,
+    required this.name,
+    this.avatarUrl,
+    this.headline,
+    this.bio,
+    this.joinedAt,
+    required this.courseCount,
+    required this.students,
+    required this.reviews,
+    required this.rating,
+    required this.courses,
+  });
+  final String id;
+  final String name;
+  final String? avatarUrl;
+  final String? headline;
+  final String? bio;
+  final DateTime? joinedAt;
+  final int courseCount;
+  final int students;
+  final int reviews;
+  final double rating;
+  final List<Course> courses;
+
+  factory InstructorProfile.fromJson(Map<String, dynamic> json) {
+    final stats = json['stats'] as Map<String, dynamic>? ?? const {};
+    return InstructorProfile(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      avatarUrl: json['avatarUrl'] as String?,
+      headline: json['headline'] as String?,
+      bio: json['bio'] as String?,
+      joinedAt: DateTime.tryParse(json['joinedAt'] as String? ?? ''),
+      courseCount: (stats['courses'] as num?)?.toInt() ?? 0,
+      students: (stats['students'] as num?)?.toInt() ?? 0,
+      reviews: (stats['reviews'] as num?)?.toInt() ?? 0,
+      rating: (stats['rating'] as num?)?.toDouble() ?? 0,
+      courses: (json['courses'] as List? ?? const [])
+          .map((c) => Course.fromJson(c as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}

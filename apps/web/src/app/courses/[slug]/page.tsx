@@ -1,9 +1,11 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CheckCircle2, Clock, PlayCircle, Star, Users } from 'lucide-react';
 import { formatDuration, formatPrice } from '@learnova/shared';
 import { Badge, Card, CardBody, Container } from '@learnova/ui';
 import { apiFetch } from '@/lib/api';
 import { EnrollButton } from '@/components/enroll-button';
+import { CourseReviews } from '@/components/course-reviews';
 import type { CourseDetail } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -32,15 +34,30 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
             <h1 className="mt-5 text-balance font-display text-4xl font-semibold leading-[1.02] tracking-[-0.03em] md:text-6xl">{course.title}</h1>
             {course.subtitle ? <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/65 md:text-xl">{course.subtitle}</p> : null}
             <div className="mt-7 flex flex-wrap items-center gap-5 text-sm text-white/70">
-              <span className="flex items-center gap-1.5 font-semibold text-white">
+              <a href="#reviews" className="flex items-center gap-1.5 font-semibold text-white hover:underline">
                 <Star size={16} className="fill-marigold text-marigold" /> {course.averageRating.toFixed(1)} ({course.ratingCount})
-              </span>
+              </a>
               <span className="flex items-center gap-1.5"><Users size={16} /> {course.enrollmentCount} students</span>
               <span className="flex items-center gap-1.5"><PlayCircle size={16} /> {totalLessons} lessons</span>
               <span className="flex items-center gap-1.5"><Clock size={16} /> {formatDuration(course.totalDurationSeconds)}</span>
             </div>
             {course.instructor ? (
-              <p className="mt-5 text-sm text-white/55">Taught by <span className="font-medium text-white">{course.instructor.name}</span></p>
+              <Link
+                href={`/instructors/${course.instructor.id}`}
+                className="group mt-6 inline-flex items-center gap-3 rounded-full py-1 pl-1 pr-4 ring-1 ring-white/15 transition-colors hover:bg-white/10"
+              >
+                {course.instructor.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={course.instructor.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+                ) : (
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-marigold font-display font-semibold text-paper-ink">
+                    {course.instructor.name[0]?.toUpperCase()}
+                  </span>
+                )}
+                <span className="text-sm text-white/60">
+                  Taught by <span className="font-semibold text-white group-hover:underline">{course.instructor.name}</span>
+                </span>
+              </Link>
             ) : null}
           </div>
 
@@ -128,6 +145,7 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
               </p>
             </section>
           ) : null}
+          <CourseReviews courseId={course.id} averageRating={course.averageRating} ratingCount={course.ratingCount} />
         </div>
 
         <aside className="lg:col-span-1">

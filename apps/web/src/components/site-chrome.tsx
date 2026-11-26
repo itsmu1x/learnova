@@ -7,8 +7,9 @@ import { Navbar } from '@/components/navbar';
 /** Public marketing chrome — hidden on instructor/admin dashboard routes. */
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isDashboard =
-    pathname?.startsWith('/instructor') || pathname?.startsWith('/admin');
+  // Exact segment match: '/instructors/:id' (public profile) keeps the site chrome.
+  const inArea = (base: string) => pathname === base || Boolean(pathname?.startsWith(`${base}/`));
+  const isDashboard = inArea('/instructor') || inArea('/admin');
 
   if (isDashboard) return <>{children}</>;
 

@@ -4,9 +4,13 @@ import type { AIMessage } from './types.js';
 export * from './types.js';
 export { getAIService } from './providers.js';
 
+// The apps show AI text as plain text, so Markdown would appear as literal ** and #.
+const PLAIN = 'Write plain text only: no Markdown (no **, #, or backticks). Use "•" for bullet points.';
+
 const TUTOR_SYSTEM = `You are Learnova AI Tutor, a patient, encouraging teacher.
 Explain clearly, use short paragraphs and concrete examples, and adapt to the
-student's level. When given lesson context, ground your answer in it.`;
+student's level. When given lesson context, ground your answer in it.
+${PLAIN}`;
 
 interface TutorArgs {
   question: string;
@@ -34,7 +38,7 @@ export async function askTutor(args: TutorArgs): Promise<string> {
 export async function summarizeLesson(title: string, transcript: string): Promise<string> {
   return getAIService().chat(
     [
-      { role: 'system', content: 'Summarise the lesson into 4-6 crisp bullet points.' },
+      { role: 'system', content: `Summarise the lesson into 4-6 crisp bullet points. ${PLAIN}` },
       { role: 'user', content: `Lesson: ${title}\n\nTranscript:\n${transcript.slice(0, 6000)}` },
     ],
     { temperature: 0.3 },
@@ -47,7 +51,7 @@ export async function generateCourseDescription(title: string, topics: string[])
       {
         role: 'system',
         content:
-          'Write a compelling, professional course description (120-180 words) for a course landing page.',
+          `Write a compelling, professional course description (120-180 words) for a course landing page. ${PLAIN}`,
       },
       { role: 'user', content: `Title: ${title}\nTopics: ${topics.join(', ')}` },
     ],

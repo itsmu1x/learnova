@@ -55,7 +55,7 @@ export function Navbar() {
 
         <div className="ml-auto flex items-center gap-1">
           <Link
-            href="/search"
+            href="/courses"
             aria-label="Search courses"
             className="rounded-full p-2.5 text-paper-mute transition-colors hover:bg-paper-ink/5 hover:text-paper-ink dark:hover:bg-white/10 dark:hover:text-white"
           >
@@ -84,6 +84,19 @@ export function Navbar() {
                 </button>
                 <Link href="/dashboard">
                   <Button size="sm">My learning</Button>
+                </Link>
+                <Link
+                  href="/settings"
+                  aria-label="Settings"
+                  title="Settings"
+                  className="grid h-9 w-9 place-items-center overflow-hidden rounded-full bg-marigold font-display text-sm font-semibold text-paper-ink ring-2 ring-transparent transition hover:ring-paper-ink/20 dark:hover:ring-white/30"
+                >
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    user.name[0]?.toUpperCase()
+                  )}
                 </Link>
               </>
             ) : (
@@ -129,6 +142,9 @@ export function Navbar() {
                 <>
                   <Link href="/dashboard" className="flex-1">
                     <Button className="w-full">My learning</Button>
+                  </Link>
+                  <Link href="/settings">
+                    <Button variant="outline">Settings</Button>
                   </Link>
                   <Button variant="outline" onClick={() => void logout()}>
                     Sign out

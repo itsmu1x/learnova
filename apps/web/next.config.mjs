@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Course search moved to /courses; the query string (?q=, ?topic=) is carried over.
+  async redirects() {
+    return [{ source: '/search', destination: '/courses', permanent: true }];
+  },
   transpilePackages: ['@learnova/ui', '@learnova/shared', '@mux/mux-player', '@mux/mux-player-react'],
   images: {
     remotePatterns: [

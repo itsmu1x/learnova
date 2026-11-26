@@ -111,6 +111,17 @@ function LearnInner({ courseId }: { courseId: string }) {
 
         <Container className="py-8">
           <CheckoutNotice className="mb-6" />
+          {percent === 100 ? (
+            <div className="mb-6 flex flex-col gap-3 rounded-3xl bg-paper-ink p-5 text-white sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-display text-lg font-semibold">You finished the course</p>
+                <p className="text-sm text-white/65">Your certificate is on your dashboard. How was it?</p>
+              </div>
+              <Link href={`/courses/${course.slug}#reviews`}>
+                <Button className="bg-marigold text-paper-ink hover:bg-white">Rate this course</Button>
+              </Link>
+            </div>
+          ) : null}
           {actionError ? (
             <p role="alert" className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
               {actionError}

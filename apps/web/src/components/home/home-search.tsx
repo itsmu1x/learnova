@@ -15,10 +15,10 @@ export function HomeSearch() {
     e.preventDefault();
     const query = q.trim();
     if (!query) {
-      router.push('/search');
+      router.push('/courses');
       return;
     }
-    router.push(`/search?q=${encodeURIComponent(query)}`);
+    router.push(`/courses?q=${encodeURIComponent(query)}`);
   }
 
   return (
@@ -57,7 +57,7 @@ export function HomeSearch() {
           <button
             key={s}
             type="button"
-            onClick={() => router.push(`/search?q=${encodeURIComponent(s)}`)}
+            onClick={() => router.push(`/courses?q=${encodeURIComponent(s)}`)}
             className="rounded-full border border-paper-line bg-paper-elev px-3.5 py-1.5 font-medium text-paper-ink transition-colors hover:border-paper-ink dark:text-slate-200 dark:hover:border-slate-300"
           >
             {s}

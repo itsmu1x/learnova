@@ -374,6 +374,26 @@ export const authService = {
     });
   },
 
+  /** Signed-in password change. Requires the current password; signs out every session afterwards. */
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await usersRepository.findById(userId);
+    if (!user) throw new NotFoundError('User not found');
+    if (!user.passwordHash) {
+      throw new BadRequestError(
+        'Your account signs in with Google or GitHub and has no password yet. Use “Forgot password” to set one.',
+      );
+    }
+    if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+      throw new BadRequestError('Your current password is incorrect.');
+    }
+    if (!isStrongPassword(newPassword)) {
+      throw new ValidationError('Use at least 8 characters with upper and lower case letters and a number.');
+    }
+    await usersRepository.update(userId, { passwordHash: await hashPassword(newPassword) });
+    await authRepository.revokeAllForUser(userId, 'refresh');
+    await recordAudit({ actorId: userId, action: 'user.password_change', entityType: 'user', entityId: userId });
+  },
+
   async me(userId: string): Promise<AuthenticatedUser> {
     const user = await usersRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');

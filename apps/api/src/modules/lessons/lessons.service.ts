@@ -169,7 +169,11 @@ export const lessonsService = {
   async reorder(actor: Actor, courseId: string, orderedIds: string[]) {
     await coursesService.assertOwnership(actor, courseId);
     for (let i = 0; i < orderedIds.length; i++) {
-      await db().update(schema.lessons).set({ position: i }).where(eq(schema.lessons.id, orderedIds[i]!));
+      // Scoped to the owned course so ids from someone else's course are ignored.
+      await db()
+        .update(schema.lessons)
+        .set({ position: i, updatedAt: new Date() })
+        .where(and(eq(schema.lessons.id, orderedIds[i]!), eq(schema.lessons.courseId, courseId)));
     }
   },
 };

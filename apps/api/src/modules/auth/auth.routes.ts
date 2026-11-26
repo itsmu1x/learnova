@@ -3,8 +3,11 @@ import { asyncHandler } from '../../core/http/async-handler.js';
 import { authenticate } from '../../core/middleware/authenticate.js';
 import { authRateLimiter } from '../../core/middleware/rate-limit.js';
 import { validate } from '../../core/middleware/validate.js';
+import { sendOk } from '../../core/http/responses.js';
 import { authController } from './auth.controller.js';
+import { authService } from './auth.service.js';
 import {
+  changePasswordSchema,
   forgotPasswordSchema,
   loginSchema,
   registerInstructorSchema,
@@ -36,6 +39,16 @@ authRouter.post(
 authRouter.post('/refresh', asyncHandler(authController.refresh));
 authRouter.post('/logout', asyncHandler(authController.logout));
 authRouter.get('/me', authenticate, asyncHandler(authController.me));
+authRouter.post(
+  '/change-password',
+  authenticate,
+  authRateLimiter,
+  validate({ body: changePasswordSchema }),
+  asyncHandler(async (req, res) => {
+    await authService.changePassword(req.user!.id, req.body.currentPassword, req.body.newPassword);
+    sendOk(res, { changed: true });
+  }),
+);
 
 authRouter.post(
   '/verify-email',

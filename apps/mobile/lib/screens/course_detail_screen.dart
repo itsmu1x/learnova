@@ -10,6 +10,7 @@ import '../widgets/course_card.dart';
 import '../widgets/pro_sheet.dart';
 import '../widgets/mux_lesson_player.dart';
 import '../widgets/stat_chip.dart';
+import 'instructor_screen.dart';
 import 'learn_screen.dart';
 
 class CourseDetailScreen extends StatefulWidget {
@@ -20,7 +21,8 @@ class CourseDetailScreen extends StatefulWidget {
   State<CourseDetailScreen> createState() => _CourseDetailScreenState();
 }
 
-class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBindingObserver {
+class _CourseDetailScreenState extends State<CourseDetailScreen>
+    with WidgetsBindingObserver {
   final _courses = CourseService();
   final _learning = LearningService();
   Course? _course;
@@ -46,7 +48,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _pendingCheckoutCourseId != null) {
+    if (state == AppLifecycleState.resumed &&
+        _pendingCheckoutCourseId != null) {
       _refreshAfterCheckout(_pendingCheckoutCourseId!);
     }
   }
@@ -100,7 +103,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
   void _openLearn(String courseId, {bool purchaseSuccess = false}) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => LearnScreen(courseId: courseId, purchaseSuccess: purchaseSuccess),
+        builder: (_) =>
+            LearnScreen(courseId: courseId, purchaseSuccess: purchaseSuccess),
       ),
     );
   }
@@ -115,7 +119,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
     if (course.isPro) {
       await showProSheet(context);
       // They may have subscribed on the web meanwhile.
-      final status = await _learning.enrollmentStatus(course.id).catchError((_) => _status!);
+      final status = await _learning
+          .enrollmentStatus(course.id)
+          .catchError((_) => _status!);
       if (mounted) setState(() => _status = status);
       return;
     }
@@ -140,7 +146,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
           mode: LaunchMode.inAppBrowserView,
         );
         if (!launched) {
-          final fallback = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          final fallback =
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
           if (!fallback && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Could not open Stripe checkout.')),
@@ -155,12 +162,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
       _openLearn(course.id, purchaseSuccess: true);
     } catch (e) {
       final message = e.toString();
-      if (message.contains('Already enrolled') || message.contains('CONFLICT')) {
+      if (message.contains('Already enrolled') ||
+          message.contains('CONFLICT')) {
         if (mounted) _openLearn(course.id);
         return;
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$e')));
       }
     } finally {
       if (mounted) setState(() => _enrolling = false);
@@ -186,7 +195,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (_course == null) {
-      return Scaffold(appBar: AppBar(), body: Center(child: Text(_error ?? 'Not found')));
+      return Scaffold(
+          appBar: AppBar(), body: Center(child: Text(_error ?? 'Not found')));
     }
     final course = _course!;
     final theme = Theme.of(context);
@@ -203,23 +213,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                 course.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, shadows: [
-                  Shadow(color: Colors.black45, blurRadius: 8),
-                ]),
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(color: Colors.black45, blurRadius: 8),
+                    ]),
               ),
               background: Stack(
                 fit: StackFit.expand,
                 children: [
                   course.thumbnailUrl != null
-                      ? CachedNetworkImage(imageUrl: course.thumbnailUrl!, fit: BoxFit.cover)
-                      : Container(decoration: const BoxDecoration(gradient: AppTheme.heroGradient)),
-                  if (course.isPro) const Positioned(top: 100, left: 16, child: ProBadge()),
+                      ? CachedNetworkImage(
+                          imageUrl: course.thumbnailUrl!, fit: BoxFit.cover)
+                      : Container(
+                          decoration: const BoxDecoration(
+                              gradient: AppTheme.heroGradient)),
+                  if (course.isPro)
+                    const Positioned(top: 100, left: 16, child: ProBadge()),
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, AppTheme.navy.withValues(alpha: 0.85)],
+                        colors: [
+                          Colors.transparent,
+                          AppTheme.navy.withValues(alpha: 0.85)
+                        ],
                       ),
                     ),
                   ),
@@ -236,19 +256,32 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                   if (course.subtitle != null)
                     Text(
                       course.subtitle!,
-                      style: theme.textTheme.bodyLarge?.copyWith(color: theme.hintColor),
+                      style: theme.textTheme.bodyLarge
+                          ?.copyWith(color: theme.hintColor),
                     ),
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      StatChip(icon: Icons.star_rounded, label: course.averageRating.toStringAsFixed(1), color: AppTheme.marigoldDeep),
-                      StatChip(icon: Icons.people_outline, label: '${course.enrollmentCount} students'),
-                      StatChip(icon: Icons.play_lesson_outlined, label: '${course.lessonCount} lessons'),
-                      StatChip(icon: Icons.school_outlined, label: CourseCard.levelLabel(course.level)),
+                      StatChip(
+                          icon: Icons.star_rounded,
+                          label: course.averageRating.toStringAsFixed(1),
+                          color: AppTheme.marigoldDeep),
+                      StatChip(
+                          icon: Icons.people_outline,
+                          label: '${course.enrollmentCount} students'),
+                      StatChip(
+                          icon: Icons.play_lesson_outlined,
+                          label: '${course.lessonCount} lessons'),
+                      StatChip(
+                          icon: Icons.school_outlined,
+                          label: CourseCard.levelLabel(course.level)),
                       if (enrolled)
-                        const StatChip(icon: Icons.check_circle, label: 'Owned', color: AppTheme.success),
+                        const StatChip(
+                            icon: Icons.check_circle,
+                            label: 'Owned',
+                            color: AppTheme.success),
                     ],
                   ),
                   if (course.instructor != null) ...[
@@ -257,7 +290,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                   ],
                   if (course.outcomes.isNotEmpty) ...[
                     const SizedBox(height: 28),
-                    Text("What you'll learn", style: theme.textTheme.titleLarge),
+                    Text("What you'll learn",
+                        style: theme.textTheme.titleLarge),
                     const SizedBox(height: 12),
                     ...course.outcomes.map(
                       (o) => Padding(
@@ -265,7 +299,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.check_circle_rounded, size: 18, color: theme.colorScheme.primary),
+                            Icon(Icons.check_circle_rounded,
+                                size: 18, color: theme.colorScheme.primary),
                             const SizedBox(width: 10),
                             Expanded(child: Text(o)),
                           ],
@@ -284,16 +319,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                   ),
                   if (course.description != null) ...[
                     const SizedBox(height: 20),
-                    Text('About this course', style: theme.textTheme.titleLarge),
+                    Text('About this course',
+                        style: theme.textTheme.titleLarge),
                     const SizedBox(height: 8),
-                    Text(course.description!, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
+                    Text(course.description!,
+                        style:
+                            theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
                   ],
                   const SizedBox(height: 28),
                   _ReviewsSection(
                     course: course,
                     reviews: _reviews,
                     canReview: enrolled,
-                    onWritten: () => setState(() => _reviews = _courses.reviews(course.id)),
+                    onWritten: () =>
+                        setState(() => _reviews = _courses.reviews(course.id)),
                   ),
                   const SizedBox(height: 100),
                 ],
@@ -306,7 +345,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
+          border:
+              Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
         ),
         child: SafeArea(
           top: false,
@@ -323,7 +363,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                             ? 'Pro'
                             : course.priceLabel,
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: enrolled || course.isFree ? AppTheme.success : null,
+                      color:
+                          enrolled || course.isFree ? AppTheme.success : null,
                     ),
                   ),
                   Text(
@@ -334,7 +375,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with WidgetsBin
                             : course.isPro
                                 ? 'Included with Pro'
                                 : 'One-time purchase',
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: theme.hintColor),
                   ),
                 ],
               ),
@@ -395,12 +437,14 @@ class _CurriculumSectionState extends State<_CurriculumSection> {
                         children: [
                           Text(
                             widget.section.title,
-                            style: widget.theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                            style: widget.theme.textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${widget.section.lessons.length} lessons',
-                            style: widget.theme.textTheme.bodySmall?.copyWith(color: widget.theme.hintColor),
+                            style: widget.theme.textTheme.bodySmall
+                                ?.copyWith(color: widget.theme.hintColor),
                           ),
                         ],
                       ),
@@ -408,7 +452,8 @@ class _CurriculumSectionState extends State<_CurriculumSection> {
                     AnimatedRotation(
                       turns: _expanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 200),
-                      child: Icon(Icons.expand_more, color: scheme.onSurfaceVariant),
+                      child: Icon(Icons.expand_more,
+                          color: scheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -426,11 +471,14 @@ class _CurriculumSectionState extends State<_CurriculumSection> {
                         endIndent: 16,
                         color: scheme.outlineVariant,
                       ),
-                    _LessonRow(lesson: widget.section.lessons[i], theme: widget.theme),
+                    _LessonRow(
+                        lesson: widget.section.lessons[i], theme: widget.theme),
                   ],
                 ],
               ),
-              crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              crossFadeState: _expanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 200),
               sizeCurve: Curves.easeInOut,
             ),
@@ -452,43 +500,48 @@ class _LessonRow extends StatelessWidget {
     return InkWell(
       onTap: lesson.isPreview ? () => _playPreview(context) : null,
       child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Icon(
-            lesson.isPreview ? Icons.play_circle_filled : Icons.lock_outline_rounded,
-            size: 22,
-            color: lesson.isPreview ? theme.colorScheme.primary : theme.hintColor,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              lesson.title,
-              style: theme.textTheme.bodyMedium,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              lesson.isPreview
+                  ? Icons.play_circle_filled
+                  : Icons.lock_outline_rounded,
+              size: 22,
+              color: lesson.isPreview
+                  ? theme.colorScheme.primary
+                  : theme.hintColor,
             ),
-          ),
-          if (lesson.isPreview)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
+            const SizedBox(width: 12),
+            Expanded(
               child: Text(
-                'Watch free',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                lesson.title,
+                style: theme.textTheme.bodyMedium,
               ),
-            )
-          else if (lesson.durationSeconds > 0)
-            Text(
-              '${(lesson.durationSeconds / 60).ceil()} min',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
             ),
-        ],
-      ),
+            if (lesson.isPreview)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Watch free',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+            else if (lesson.durationSeconds > 0)
+              Text(
+                '${(lesson.durationSeconds / 60).ceil()} min',
+                style:
+                    theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -504,13 +557,18 @@ class _LessonRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Free preview', style: Theme.of(ctx).textTheme.labelLarge?.copyWith(color: Theme.of(ctx).colorScheme.primary)),
+              Text('Free preview',
+                  style: Theme.of(ctx)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: Theme.of(ctx).colorScheme.primary)),
               const SizedBox(height: 2),
               Text(lesson.title, style: Theme.of(ctx).textTheme.titleLarge),
               const SizedBox(height: 14),
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: MuxLessonPlayer(lessonId: lesson.id, title: lesson.title),
+                child:
+                    MuxLessonPlayer(lessonId: lesson.id, title: lesson.title),
               ),
             ],
           ),
@@ -528,37 +586,51 @@ class _InstructorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 26,
-              backgroundColor: AppTheme.marigold,
-              foregroundColor: AppTheme.navy,
-              backgroundImage:
-                  instructor.avatarUrl != null ? CachedNetworkImageProvider(instructor.avatarUrl!) : null,
-              child: instructor.avatarUrl == null
-                  ? Text(
-                      instructor.name.isEmpty ? '?' : instructor.name[0].toUpperCase(),
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Your instructor',
-                    style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                  Text(instructor.name, style: theme.textTheme.titleLarge),
-                ],
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (_) => InstructorScreen(instructorId: instructor.id)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 26,
+                backgroundColor: AppTheme.marigold,
+                foregroundColor: AppTheme.navy,
+                backgroundImage: instructor.avatarUrl != null
+                    ? CachedNetworkImageProvider(instructor.avatarUrl!)
+                    : null,
+                child: instructor.avatarUrl == null
+                    ? Text(
+                        instructor.name.isEmpty
+                            ? '?'
+                            : instructor.name[0].toUpperCase(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 20),
+                      )
+                    : null,
               ),
-            ),
-          ],
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Your instructor',
+                      style: theme.textTheme.labelMedium
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                    Text(instructor.name, style: theme.textTheme.titleLarge),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: theme.colorScheme.onSurfaceVariant),
+            ],
+          ),
         ),
       ),
     );
@@ -600,7 +672,8 @@ class _ReviewsSection extends StatelessWidget {
                 Stars(rating: course.averageRating.round()),
                 Text(
                   '${course.ratingCount} rating${course.ratingCount == 1 ? '' : 's'}',
-                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -621,23 +694,31 @@ class _ReviewsSection extends StatelessWidget {
           future: reviews,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
+              return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: CircularProgressIndicator()));
             }
             if (snap.hasError) {
               return Text(
                 'Couldn’t load reviews right now.',
-                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               );
             }
             final items = snap.data ?? [];
             if (items.isEmpty) {
               return Text(
-                canReview ? 'No reviews yet. Be the first to share what you thought.' : 'No reviews yet.',
-                style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                canReview
+                    ? 'No reviews yet. Be the first to share what you thought.'
+                    : 'No reviews yet.',
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               );
             }
             return Column(
-              children: [for (final r in items.take(10)) _ReviewTile(review: r)],
+              children: [
+                for (final r in items.take(10)) _ReviewTile(review: r)
+              ],
             );
           },
         ),
@@ -687,16 +768,23 @@ class _ReviewTile extends StatelessWidget {
                     radius: 16,
                     backgroundColor: scheme.primaryContainer,
                     child: Text(
-                      review.userName.isEmpty ? '?' : review.userName[0].toUpperCase(),
-                      style: TextStyle(color: scheme.onPrimaryContainer, fontWeight: FontWeight.w700),
+                      review.userName.isEmpty
+                          ? '?'
+                          : review.userName[0].toUpperCase(),
+                      style: TextStyle(
+                          color: scheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w700),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(child: Text(review.userName, style: theme.textTheme.titleSmall)),
+                  Expanded(
+                      child: Text(review.userName,
+                          style: theme.textTheme.titleSmall)),
                   if (review.createdAt != null)
                     Text(
                       DateFormat.yMMMd().format(review.createdAt!.toLocal()),
-                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                 ],
               ),
@@ -708,7 +796,8 @@ class _ReviewTile extends StatelessWidget {
               ],
               if (review.body != null && review.body!.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(review.body!, style: theme.textTheme.bodyMedium?.copyWith(height: 1.45)),
+                Text(review.body!,
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.45)),
               ],
             ],
           ),
@@ -758,7 +847,8 @@ Future<bool?> showReviewSheet(BuildContext context, String courseId) {
         }
 
         return Padding(
-          padding: EdgeInsets.fromLTRB(24, 0, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          padding: EdgeInsets.fromLTRB(
+              24, 0, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -774,7 +864,9 @@ Future<bool?> showReviewSheet(BuildContext context, String courseId) {
                       iconSize: 40,
                       onPressed: () => setSheet(() => rating = i),
                       icon: Icon(
-                        i <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                        i <= rating
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
                         color: AppTheme.marigold,
                       ),
                     ),
@@ -784,7 +876,8 @@ Future<bool?> showReviewSheet(BuildContext context, String courseId) {
               TextField(
                 controller: title,
                 maxLength: 220,
-                decoration: const InputDecoration(labelText: 'Headline (optional)', counterText: ''),
+                decoration: const InputDecoration(
+                    labelText: 'Headline (optional)', counterText: ''),
               ),
               const SizedBox(height: 10),
               TextField(

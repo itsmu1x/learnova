@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@learnova/ui';
-import { ArrowLeft, LogOut } from 'lucide-react';
+import { ArrowLeft, LogOut, Settings } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { useAuth } from '@/lib/auth-context';
 
@@ -71,6 +71,13 @@ export function DashboardShell({ badge, nav, children }: DashboardShellProps) {
           >
             <ArrowLeft size={16} />
             Back to site
+          </Link>
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 rounded-2xl px-4 py-2 text-sm text-white/55 hover:bg-white/[0.07] hover:text-white"
+          >
+            <Settings size={16} />
+            Settings
           </Link>
           <div className="flex items-center gap-3 rounded-2xl bg-white/[0.06] px-3 py-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marigold font-display text-sm font-semibold text-paper-ink">

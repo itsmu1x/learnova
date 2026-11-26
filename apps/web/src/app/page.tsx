@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, BadgeCheck, Sparkles } from 'lucide-react';
 import { Container } from '@learnova/ui';
 import { safeFetch } from '@/lib/api';
-import { CourseShelf } from '@/components/home/course-shelf';
+import { CourseTabs } from '@/components/home/course-tabs';
 import { FeaturedSpotlight } from '@/components/home/featured-spotlight';
 import { GoalPicker } from '@/components/home/goal-picker';
 import { HomeSearch } from '@/components/home/home-search';
@@ -66,14 +66,20 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Shelves */}
-      <section className="border-y border-paper-line bg-paper-elev">
-        <Container className="space-y-16 py-16 md:space-y-20 md:py-24">
-          <CourseShelf title="Popular right now" subtitle="What other learners are taking this week" courses={popular} />
-          <CourseShelf title="Just published" subtitle="New courses from our instructors" courses={newest} />
-          <CourseShelf title="Highest rated" subtitle="Courses learners scored best" courses={topRated} />
-        </Container>
-      </section>
+      {/* Courses: one tabbed grid instead of three identical rows */}
+      {popular.length > 0 ? (
+        <section className="border-y border-paper-line bg-paper-elev">
+          <Container className="py-16 md:py-24">
+            <CourseTabs
+              tabs={[
+                { id: 'popular', label: 'Popular', courses: popular },
+                { id: 'new', label: 'New', courses: newest },
+                { id: 'rated', label: 'Top rated', courses: topRated },
+              ]}
+            />
+          </Container>
+        </section>
+      ) : null}
 
       {/* How it works */}
       <section>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Github } from 'lucide-react';
 import { Button, Input } from '@learnova/ui';
 import { AuthShell } from '@/components/auth-shell';
@@ -16,6 +16,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  useEffect(() => {
+    // Read once on mount; useSearchParams would force a Suspense boundary for this one flag.
+    if (new URLSearchParams(window.location.search).get('password') === 'changed') {
+      setNotice('Password changed. Log in with your new password.');
+    }
+  }, []);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
@@ -65,6 +72,11 @@ export default function LoginPage() {
         <span className="h-px flex-1 bg-paper-line dark:bg-slate-700" />
       </div>
 
+      {notice ? (
+        <p role="status" className="mb-4 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+          {notice}
+        </p>
+      ) : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block space-y-1.5">
           <span className="text-sm font-medium text-paper-ink dark:text-slate-200">Email</span>

@@ -12,6 +12,19 @@ import { reviewsService } from './reviews.service.js';
 export const reviewsRouter: Router = Router();
 
 reviewsRouter.get(
+  '/',
+  authenticate,
+  authorize(Permission.MODERATE_REVIEWS),
+  validate({ query: z.object({ hidden: z.enum(['true', 'false']).optional() }).passthrough() }),
+  asyncHandler(async (req, res) => {
+    const { page, limit, offset } = resolvePage(req.query as never);
+    const hidden = req.query.hidden === undefined ? undefined : req.query.hidden === 'true';
+    const { items, total } = await reviewsService.listAll({ limit, offset, hidden });
+    sendOk(res, items, 200, toPageMeta(total, page, limit));
+  }),
+);
+
+reviewsRouter.get(
   '/course/:courseId',
   optionalAuth,
   asyncHandler(async (req, res) => {

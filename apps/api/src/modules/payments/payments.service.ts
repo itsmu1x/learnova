@@ -207,9 +207,13 @@ export const paymentsService = {
         .select({
           payment: schema.payments,
           user: { id: schema.users.id, name: schema.users.name, email: schema.users.email },
+          purchase: { type: schema.purchases.type, courseId: schema.purchases.courseId },
+          course: { title: schema.courses.title },
         })
         .from(schema.payments)
         .innerJoin(schema.users, eq(schema.payments.userId, schema.users.id))
+        .leftJoin(schema.purchases, eq(schema.payments.purchaseId, schema.purchases.id))
+        .leftJoin(schema.courses, eq(schema.purchases.courseId, schema.courses.id))
         .orderBy(desc(schema.payments.createdAt))
         .limit(params.limit)
         .offset(params.offset),
@@ -221,15 +225,37 @@ export const paymentsService = {
   async refund(actorId: string, paymentId: string) {
     const [payment] = await db().select().from(schema.payments).where(eq(schema.payments.id, paymentId)).limit(1);
     if (!payment) throw new NotFoundError('Payment not found');
+    if (payment.status !== 'succeeded') {
+      throw new BadRequestError(`Only successful payments can be refunded (this one is ${payment.status}).`);
+    }
+
+    // Send the money back first; only mark it refunded once Stripe accepted it.
+    if (isStripeConfigured() && payment.provider === 'stripe') {
+      if (!payment.providerPaymentId) {
+        throw new BadRequestError('This payment has no Stripe charge to refund. Refund it from the Stripe dashboard.');
+      }
+      await getStripe().refunds.create(
+        { payment_intent: payment.providerPaymentId },
+        { idempotencyKey: `refund-${payment.id}` },
+      );
+    }
+
     await db()
       .update(schema.payments)
       .set({ status: 'refunded', refundedAt: new Date(), updatedAt: new Date() })
       .where(eq(schema.payments.id, paymentId));
     if (payment.purchaseId) {
-      await db()
+      const [purchase] = await db()
         .update(schema.purchases)
-        .set({ status: 'refunded' })
-        .where(eq(schema.purchases.id, payment.purchaseId));
+        .set({ status: 'refunded', updatedAt: new Date() })
+        .where(eq(schema.purchases.id, payment.purchaseId))
+        .returning();
+      // A refunded course purchase no longer grants access.
+      if (purchase?.courseId) {
+        await db()
+          .delete(schema.enrollments)
+          .where(and(eq(schema.enrollments.userId, payment.userId), eq(schema.enrollments.courseId, purchase.courseId)));
+      }
     }
     await recordAudit({
       actorId,

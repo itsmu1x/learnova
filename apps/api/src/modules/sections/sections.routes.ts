@@ -9,6 +9,7 @@ import { authorize } from '../../core/middleware/authorize.js';
 import { validate } from '../../core/middleware/validate.js';
 import { sendOk } from '../../core/http/responses.js';
 import { coursesService } from '../courses/courses.service.js';
+import { coursesRepository } from '../courses/courses.repository.js';
 
 export const sectionsRouter: Router = Router();
 
@@ -19,6 +20,7 @@ const createSchema = z.object({
 });
 
 const reorderSchema = z.object({
+  courseId: z.string().uuid(),
   orderedIds: z.array(z.string().uuid()),
 });
 
@@ -69,12 +71,14 @@ sectionsRouter.post(
   '/reorder',
   validate({ body: reorderSchema }),
   asyncHandler(async (req, res) => {
-    const ids = req.body.orderedIds as string[];
-    for (let i = 0; i < ids.length; i++) {
+    const { courseId, orderedIds } = req.body as z.infer<typeof reorderSchema>;
+    await coursesService.assertOwnership(actor(req), courseId);
+    for (let i = 0; i < orderedIds.length; i++) {
+      // Scoped to the owned course so ids from someone else's course are ignored.
       await db()
         .update(schema.sections)
-        .set({ position: i })
-        .where(eq(schema.sections.id, ids[i]!));
+        .set({ position: i, updatedAt: new Date() })
+        .where(and(eq(schema.sections.id, orderedIds[i]!), eq(schema.sections.courseId, courseId)));
     }
     sendOk(res, { reordered: true });
   }),
@@ -86,19 +90,15 @@ sectionsRouter.delete(
     const [section] = await db()
       .select()
       .from(schema.sections)
-      .where(eq(schema.sections.id, req.params.id!))
+      .where(and(eq(schema.sections.id, req.params.id!), isNull(schema.sections.deletedAt)))
       .limit(1);
     if (!section) throw new NotFoundError('Section not found');
     await coursesService.assertOwnership(actor(req), section.courseId);
-    await db()
-      .update(schema.sections)
-      .set({ deletedAt: new Date() })
-      .where(eq(schema.sections.id, req.params.id!));
-    await coursesService.assertOwnership(actor(req), section.courseId);
-    await db()
-      .update(schema.lessons)
-      .set({ deletedAt: new Date() })
-      .where(eq(schema.lessons.sectionId, req.params.id!));
+    const now = new Date();
+    await db().update(schema.sections).set({ deletedAt: now }).where(eq(schema.sections.id, section.id));
+    await db().update(schema.lessons).set({ deletedAt: now }).where(eq(schema.lessons.sectionId, section.id));
+    // Lesson count / duration shown on course cards must drop with the deleted lessons.
+    await coursesRepository.recomputeCounts(section.courseId);
     sendOk(res, { deleted: true });
   }),
 );

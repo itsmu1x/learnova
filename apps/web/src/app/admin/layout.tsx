@@ -1,12 +1,14 @@
 'use client';
 
-import { ClipboardList, LayoutDashboard, Shield, Users, ScrollText } from 'lucide-react';
+import { ClipboardList, CreditCard, LayoutDashboard, MessageSquare, Shield, Users, ScrollText } from 'lucide-react';
 import { DashboardShell } from '@/components/dashboard-shell';
 
 const NAV = [
   { href: '/admin', label: 'Overview', icon: <LayoutDashboard size={18} />, exact: true },
   { href: '/admin/users', label: 'Users', icon: <Users size={18} /> },
   { href: '/admin/instructor-applications', label: 'Applications', icon: <ClipboardList size={18} /> },
+  { href: '/admin/payments', label: 'Payments', icon: <CreditCard size={18} /> },
+  { href: '/admin/reviews', label: 'Reviews', icon: <MessageSquare size={18} /> },
   { href: '/admin/roles', label: 'Roles', icon: <Shield size={18} /> },
   { href: '/admin/audit', label: 'Audit log', icon: <ScrollText size={18} /> },
 ];

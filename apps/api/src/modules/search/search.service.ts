@@ -39,7 +39,7 @@ export class PostgresSearchProvider implements SearchProvider {
         title: schema.courses.title,
         subtitle: schema.courses.subtitle,
         slug: schema.courses.slug,
-        rank: sql<number>`ts_rank(to_tsvector('english', ${schema.courses.title} || ' ' || coalesce(${schema.courses.subtitle}, '') || ' ' || coalesce(${schema.courses.description}, '')), ${tsquery})`,
+        rank: sql<number>`ts_rank(to_tsvector('english', ${schema.courses.title} || ' ' || coalesce(${schema.courses.subtitle}, '') || ' ' || coalesce(${schema.courses.description}, '')), ${tsquery})`.as('rank'),
       })
       .from(schema.courses)
       .where(
@@ -58,7 +58,7 @@ export class PostgresSearchProvider implements SearchProvider {
         title: schema.lessons.title,
         subtitle: schema.lessons.description,
         courseSlug: schema.courses.slug,
-        rank: sql<number>`ts_rank(to_tsvector('english', ${schema.lessons.title} || ' ' || coalesce(${schema.lessons.description}, '')), ${tsquery})`,
+        rank: sql<number>`ts_rank(to_tsvector('english', ${schema.lessons.title} || ' ' || coalesce(${schema.lessons.description}, '')), ${tsquery})`.as('rank'),
       })
       .from(schema.lessons)
       .innerJoin(schema.courses, eq(schema.lessons.courseId, schema.courses.id))
@@ -77,7 +77,7 @@ export class PostgresSearchProvider implements SearchProvider {
         id: schema.users.id,
         title: schema.users.name,
         subtitle: schema.users.headline,
-        rank: sql<number>`ts_rank(to_tsvector('english', ${schema.users.name} || ' ' || coalesce(${schema.users.headline}, '')), ${tsquery})`,
+        rank: sql<number>`ts_rank(to_tsvector('english', ${schema.users.name} || ' ' || coalesce(${schema.users.headline}, '')), ${tsquery})`.as('rank'),
       })
       .from(schema.users)
       .innerJoin(schema.userRoles, eq(schema.users.id, schema.userRoles.userId))

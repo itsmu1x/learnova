@@ -54,9 +54,16 @@ export const coursesRepository = {
     if (filters.maxPrice !== undefined) conditions.push(lte(schema.courses.priceCents, filters.maxPrice));
     if (filters.categorySlug) conditions.push(eq(schema.categories.slug, filters.categorySlug));
     if (filters.search) {
-      const term = `%${filters.search}%`;
+      // Escape LIKE wildcards so "100%" or "a_b" match literally.
+      const term = `%${filters.search.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
       conditions.push(
-        or(ilike(schema.courses.title, term), ilike(schema.courses.subtitle, term))!,
+        or(
+          ilike(schema.courses.title, term),
+          ilike(schema.courses.subtitle, term),
+          ilike(schema.courses.description, term),
+          ilike(schema.categories.name, term),
+          ilike(schema.users.name, term),
+        )!,
       );
     }
 
@@ -91,6 +98,8 @@ export const coursesRepository = {
       db()
         .select({ total: sql<number>`count(*)::int` })
         .from(schema.courses)
+        // Same joins as the list query so the count matches (and search can match instructor names).
+        .innerJoin(schema.users, eq(schema.courses.instructorId, schema.users.id))
         .leftJoin(schema.categories, eq(schema.courses.categoryId, schema.categories.id))
         .where(where),
     ]);

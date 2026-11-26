@@ -11,10 +11,8 @@ const LEVEL: Record<CourseCardType['level'], string> = {
 
 export function CourseCard({ course }: { course: CourseCardType }) {
   return (
-    <Link
-      href={`/courses/${course.slug}`}
-      className="group flex h-full flex-col rounded-3xl border border-paper-line bg-paper-elev p-2.5 transition-colors hover:border-paper-ink/30 dark:hover:border-white/30"
-    >
+    // The title link stretches over the whole card (after:inset-0); the instructor link sits above it.
+    <article className="group relative flex h-full flex-col rounded-3xl border border-paper-line bg-paper-elev p-2.5 transition-colors focus-within:ring-2 focus-within:ring-signal hover:border-paper-ink/30 dark:hover:border-white/30">
       <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-paper-ink">
         {course.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -43,9 +41,18 @@ export function CourseCard({ course }: { course: CourseCardType }) {
           {course.category ? `, ${course.category.name}` : ''}
         </p>
         <h3 className="mt-1 line-clamp-2 font-display text-[17px] font-semibold leading-snug tracking-tight text-paper-ink transition-colors group-hover:text-signal dark:text-white dark:group-hover:text-signal-bright">
-          {course.title}
+          <Link href={`/courses/${course.slug}`} className="outline-none after:absolute after:inset-0 after:rounded-3xl">
+            {course.title}
+          </Link>
         </h3>
-        {course.instructor ? <p className="mt-1 text-sm text-paper-mute">{course.instructor.name}</p> : null}
+        {course.instructor ? (
+          <Link
+            href={`/instructors/${course.instructor.id}`}
+            className="relative z-10 mt-1 w-fit text-sm text-paper-mute hover:text-paper-ink hover:underline dark:hover:text-white"
+          >
+            {course.instructor.name}
+          </Link>
+        ) : null}
 
         <div className="mt-auto flex items-center gap-3 pt-4 text-sm text-paper-mute">
           <span className="inline-flex items-center gap-1 font-semibold text-paper-ink dark:text-white">
@@ -61,6 +68,6 @@ export function CourseCard({ course }: { course: CourseCardType }) {
           </span>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

@@ -2,11 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
+  ArrowDown,
+  ArrowUp,
+  Check,
   ChevronRight,
+  Pencil,
+  X,
   Eye,
   EyeOff,
-  GripVertical,
   Plus,
   Save,
   Settings,
@@ -27,6 +32,7 @@ import {
 } from '@learnova/ui';
 import { apiFetch } from '@/lib/api';
 import { Protected } from '@/components/protected';
+import { useAuth } from '@/lib/auth-context';
 import { VideoUploader } from '@/components/video-uploader';
 import { ThumbnailUpload } from '@/components/thumbnail-upload';
 import type { Category, CourseDetail } from '@/lib/types';
@@ -185,6 +191,79 @@ function ManageInner({ id }: { id: string }) {
       body: { title, topics },
     }).then((r) => setDescription(r.description.trim()), fail);
     setWritingDescription(false);
+  }
+
+  // --- Curriculum structure ---
+  const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  const [reordering, setReordering] = useState(false);
+
+  async function renameSection() {
+    if (!renaming || renaming.title.trim().length < 2) return;
+    const ok = await apiFetch(`/sections/${renaming.id}`, { method: 'PATCH', body: { title: renaming.title.trim() } }).then(
+      () => true,
+      fail,
+    );
+    if (ok) setRenaming(null);
+    await load();
+  }
+
+  async function deleteSection(id: string, sectionTitle: string, lessonCount: number) {
+    const what = lessonCount ? ` and its ${lessonCount} lesson${lessonCount === 1 ? '' : 's'} (with their videos)` : '';
+    if (!confirm(`Delete the section “${sectionTitle}”${what}? This can’t be undone from here.`)) return;
+    await apiFetch(`/sections/${id}`, { method: 'DELETE' }).then(() => true, fail);
+    if (course?.curriculum.find((sec) => sec.id === id)?.lessons.some((l) => l.id === selectedLessonId)) {
+      setSelectedLessonId(null);
+    }
+    await load();
+  }
+
+  function swap<T>(arr: T[], i: number, j: number): T[] {
+    const next = [...arr];
+    [next[i], next[j]] = [next[j]!, next[i]!];
+    return next;
+  }
+
+  async function moveSection(index: number, dir: -1 | 1) {
+    if (!course) return;
+    const ordered = swap(course.curriculum, index, index + dir).map((sec) => sec.id);
+    setReordering(true);
+    await apiFetch('/sections/reorder', { method: 'POST', body: { courseId: id, orderedIds: ordered } }).then(() => true, fail);
+    await load();
+    setReordering(false);
+  }
+
+  async function moveLesson(sectionIndex: number, lessonIndex: number, dir: -1 | 1) {
+    if (!course) return;
+    // Lesson positions are course-wide, so send every lesson in its new display order.
+    const sections = course.curriculum.map((sec, i) =>
+      i === sectionIndex ? swap(sec.lessons, lessonIndex, lessonIndex + dir) : sec.lessons,
+    );
+    setReordering(true);
+    await apiFetch('/lessons/reorder', {
+      method: 'POST',
+      body: { courseId: id, orderedIds: sections.flat().map((l) => l.id) },
+    }).then(() => true, fail);
+    await load();
+    setReordering(false);
+  }
+
+  const router = useRouter();
+  const { can } = useAuth();
+  const [deletingCourse, setDeletingCourse] = useState(false);
+  async function deleteCourse() {
+    if (!course) return;
+    const typed = prompt(
+      `This removes “${course.title}” from the catalog. Learners who already enrolled lose access.\n\nType the course title to confirm:`,
+    );
+    if (typed === null) return;
+    if (typed.trim() !== course.title.trim()) {
+      setActionError('The title didn’t match, so the course was not deleted.');
+      return;
+    }
+    setDeletingCourse(true);
+    const ok = await apiFetch(`/courses/${id}`, { method: 'DELETE' }).then(() => true, fail);
+    setDeletingCourse(false);
+    if (ok) router.push('/instructor/courses');
   }
 
   async function deleteLesson(lessonId: string) {
@@ -363,33 +442,96 @@ function ManageInner({ id }: { id: string }) {
               {savingCourse ? 'Saving…' : 'Save settings'}
             </Button>
           </CardBody>
+          {can('DELETE_COURSE') || can('MANAGE_ALL_COURSES') ? (
+            <div className="flex flex-col gap-3 border-t border-red-200 bg-red-50/60 p-6 sm:flex-row sm:items-center sm:justify-between dark:border-red-900/60 dark:bg-red-950/20">
+              <div>
+                <h3 className="font-display font-semibold text-red-700 dark:text-red-300">Delete this course</h3>
+                <p className="text-sm text-red-700/80 dark:text-red-300/80">
+                  Removes it from the catalog and from enrolled learners. You&apos;ll be asked to type the title.
+                </p>
+              </div>
+              <Button variant="destructive" onClick={() => void deleteCourse()} disabled={deletingCourse}>
+                <Trash2 size={16} />
+                {deletingCourse ? 'Deleting…' : 'Delete course'}
+              </Button>
+            </div>
+          ) : null}
         </Card>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
           {/* Curriculum */}
           <div className="space-y-4">
-            {course.curriculum.map((section) => (
+            {course.curriculum.map((section, si) => (
               <Card key={section.id}>
                 <CardBody>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-slate-900 dark:text-white">{section.title}</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {renaming?.id === section.id ? (
+                      <form
+                        className="flex min-w-0 flex-1 items-center gap-2"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          void renameSection();
+                        }}
+                      >
+                        <Input
+                          autoFocus
+                          aria-label="Section title"
+                          value={renaming.title}
+                          onChange={(e) => setRenaming({ id: section.id, title: e.target.value })}
+                          onKeyDown={(e) => e.key === 'Escape' && setRenaming(null)}
+                          className="h-9"
+                        />
+                        <IconButton label="Save title" type="submit">
+                          <Check size={16} />
+                        </IconButton>
+                        <IconButton label="Cancel rename" onClick={() => setRenaming(null)}>
+                          <X size={16} />
+                        </IconButton>
+                      </form>
+                    ) : (
+                      <>
+                        <h3 className="min-w-0 flex-1 truncate font-display font-semibold text-slate-900 dark:text-white">
+                          <span className="mr-1.5 text-slate-400">{si + 1}.</span>
+                          {section.title}
+                        </h3>
+                        <IconButton label={`Rename ${section.title}`} onClick={() => setRenaming({ id: section.id, title: section.title })}>
+                          <Pencil size={15} />
+                        </IconButton>
+                        <IconButton label="Move section up" disabled={si === 0 || reordering} onClick={() => void moveSection(si, -1)}>
+                          <ArrowUp size={15} />
+                        </IconButton>
+                        <IconButton
+                          label="Move section down"
+                          disabled={si === course.curriculum.length - 1 || reordering}
+                          onClick={() => void moveSection(si, 1)}
+                        >
+                          <ArrowDown size={15} />
+                        </IconButton>
+                        <IconButton
+                          label={`Delete ${section.title}`}
+                          danger
+                          onClick={() => void deleteSection(section.id, section.title, section.lessons.length)}
+                        >
+                          <Trash2 size={15} />
+                        </IconButton>
+                      </>
+                    )}
                     <Button size="sm" variant="outline" onClick={() => addLesson(section.id)}>
                       <Plus size={14} /> Add lesson
                     </Button>
                   </div>
                   <ul className="mt-3 space-y-1">
-                    {section.lessons.map((l) => (
-                      <li key={l.id}>
+                    {section.lessons.map((l, li) => (
+                      <li key={l.id} className="group flex items-center gap-1">
                         <button
                           type="button"
                           onClick={() => setSelectedLessonId(l.id)}
-                          className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
+                          className={`flex min-w-0 flex-1 items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
                             selectedLessonId === l.id
                               ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200'
                               : 'hover:bg-slate-50 dark:hover:bg-slate-800'
                           }`}
                         >
-                          <GripVertical size={14} className="shrink-0 text-slate-300" />
                           <Video size={14} className="shrink-0 text-slate-400" />
                           <span className="min-w-0 flex-1 truncate font-medium">{l.title}</span>
                           {l.isPreview ? <Badge variant="success">Preview</Badge> : null}
@@ -399,6 +541,16 @@ function ManageInner({ id }: { id: string }) {
                             </span>
                           ) : null}
                         </button>
+                        <IconButton label="Move lesson up" disabled={li === 0 || reordering} onClick={() => void moveLesson(si, li, -1)}>
+                          <ArrowUp size={14} />
+                        </IconButton>
+                        <IconButton
+                          label="Move lesson down"
+                          disabled={li === section.lessons.length - 1 || reordering}
+                          onClick={() => void moveLesson(si, li, 1)}
+                        >
+                          <ArrowDown size={14} />
+                        </IconButton>
                       </li>
                     ))}
                     {section.lessons.length === 0 ? (
@@ -545,5 +697,28 @@ function ManageInner({ id }: { id: string }) {
         </div>
       )}
     </div>
+  );
+}
+
+function IconButton({
+  label,
+  children,
+  danger,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string; danger?: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      {...props}
+      className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 transition-colors disabled:pointer-events-none disabled:opacity-30 ${
+        danger
+          ? 'hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40'
+          : 'hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white'
+      }`}
+    >
+      {children}
+    </button>
   );
 }

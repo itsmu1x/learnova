@@ -22,13 +22,14 @@ export function TopicExplorer({
   courses: CourseCardType[];
 }) {
   const topics = categories.length > 0 ? categories.slice(0, 10) : FALLBACK_TOPICS;
-  const [active, setActive] = useState(topics[0]?.slug ?? 'development');
+  // Open on a topic that actually has courses to show.
+  const firstWithCourses = topics.find((t) => courses.some((c) => c.category?.slug === t.slug));
+  const [active, setActive] = useState(firstWithCourses?.slug ?? topics[0]?.slug ?? 'development');
   const activeTopic = topics.find((t) => t.slug === active) ?? topics[0];
 
   const filtered = useMemo(() => {
-    const match = courses.filter((c) => c.category?.slug === active);
-    if (match.length > 0) return match.slice(0, 4);
-    return courses.slice(0, 4);
+    // Only this topic's courses; showing others under the wrong topic is misleading.
+    return courses.filter((c) => c.category?.slug === active).slice(0, 4);
   }, [active, courses]);
 
   return (
@@ -77,7 +78,7 @@ export function TopicExplorer({
 
       <div className="mt-8">
         <Link
-          href={`/search?q=${encodeURIComponent(activeTopic?.name ?? '')}`}
+          href={activeTopic ? `/courses?topic=${encodeURIComponent(activeTopic.slug)}` : '/courses'}
           className="font-semibold text-signal underline-offset-4 hover:underline dark:text-signal-bright"
         >
           More in {activeTopic?.name ?? 'this topic'}
