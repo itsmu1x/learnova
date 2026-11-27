@@ -14,9 +14,10 @@ const linkedinUsernameSchema = z
   .max(200)
   .transform((value) => {
     const fromUrl = value.match(/linkedin\.com\/in\/([^/?#\s]+)/i);
-    const username = (fromUrl ? decodeURIComponent(fromUrl[1]) : value.replace(/^@+/, ''))
+    // Empty fallbacks are rejected by the refine below.
+    const username = (fromUrl ? decodeURIComponent(fromUrl[1] ?? '') : value.replace(/^@+/, ''))
       .replace(/\/+$/, '')
-      .split(/[/?#]/)[0];
+      .split(/[/?#]/)[0] ?? '';
     return username;
   })
   .refine((value) => /^[a-zA-Z0-9-]{2,100}$/.test(value), {
